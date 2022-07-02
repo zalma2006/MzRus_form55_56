@@ -1,64 +1,70 @@
+import pandas as pd
+import re
+import numpy as np
+
+
 # поиск 1 таблицы (сведения о центре МК)
 def find_df1(df, z):
     a = []
     b = 0
-    for x,y in enumerate(df['1']):
+    for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().startswith('наименование') and \
-        (str(df.loc[x, '2']).startswith('Отметка (нет') or
-         str(df.loc[x, '3']).startswith('Отметка (нет') or
-         str(df.loc[x, '4']).startswith('Отметка (нет')):
+                (str(df.loc[x, '2']).startswith('Отметка (нет') or
+                 str(df.loc[x, '3']).startswith('Отметка (нет') or
+                 str(df.loc[x, '4']).startswith('Отметка (нет')):
             a.append(x)
             b += 1
         if type(y) == str and y.lower().startswith('прочий'):
-            a.append(x+1)
+            a.append(x + 1)
             b += 1
         if b >= 2:
             break
     df1 = df[a[0]: a[-1]].copy()
     df1.dropna(how='all', axis=1, inplace=True)
     df1.reset_index(drop=True, inplace=True)
-    col_names = dict(zip(df1.columns.tolist(), df1.loc[0,:].values.tolist()))
+    col_names = dict(zip(df1.columns.tolist(), df1.loc[0, :].values.tolist()))
     df1.drop(index=0, inplace=True)
     df1.rename(columns=col_names, inplace=True)
-    df1.rename(columns={re.sub(r'[xls.]', '', files[z]): 'наименование_субъекта'}, inplace=True)
+    df1.rename(columns={re.sub(r'[xls.]', '', z): 'наименование_субъекта'}, inplace=True)
     df1.loc[df1[df1[df1.columns[1]].isna()].index, df1.columns[1]] = 0
     df1.loc[df1[df1[df1.columns[1]].isin([1, '1'])].index, df1.columns[1]] = 1
     df1[df1.columns[1]] = df1[df1.columns[1]].astype(int)
     return df1
 
+
 # Кадры службы МК
-def find_df2(df2, z):
+def find_df2(df, z):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('наименование должн') and \
-            (str(df.loc[x, '2']).lower().startswith('число должност') or
-             str(df.loc[x, '3']).lower().startswith('число должност') or
-             str(df.loc[x, '4']).lower().startswith('число должност')) and len(a) != 1:
+                (str(df.loc[x, '2']).lower().startswith('число должност') or
+                 str(df.loc[x, '3']).lower().startswith('число должност') or
+                 str(df.loc[x, '4']).lower().startswith('число должност')) and len(a) != 1:
             a.append(x)
         if type(y) == str and y.lower().startswith('всего должност'):
-            a.append(x+1)
+            a.append(x + 1)
         if len(a) == 2:
             break
     df2 = df[a[0]:a[-1]].copy()
     df2.dropna(axis=1, how='all', inplace=True)
     df2.reset_index(inplace=True, drop=True)
-    for x,y in enumerate(df2.loc[0,:]):
+    for x, y in enumerate(df2.loc[0, :]):
         if str(y).lower().startswith('число должнос') and \
-        str(y).lower() != 'число должностей штатных':
+                str(y).lower() != 'число должностей штатных':
             df2.iloc[0, x] = 'число должностей штатных'
         if str(y) in ['nan', 'NaN', 'Nan'] and df2.iloc[1, x].lower().startswith('занят'):
             df2.iloc[0, x] = 'число должностей занятых'
         if str(y).lower().startswith('имеют квалификационн') and \
-        df2.iloc[1, x].lower().startswith('высш'):
+                df2.iloc[1, x].lower().startswith('высш'):
             df2.iloc[0, x] = 'имеют квалификационную категорию из гр. 5 высшую'
         if str(y) in ['nan', 'NaN', 'Nan'] and df2.iloc[1, x].lower().startswith('перв'):
             df2.iloc[0, x] = 'имеют квалификационную категорию из гр. 5 первую'
         if str(y) in ['nan', 'NaN', 'Nan'] and df2.iloc[1, x].lower().startswith('втор'):
             df2.iloc[0, x] = 'имеют квалификационную категорию из гр. 5 вторую'
-    col_names = dict(zip(df2.columns.tolist(), df2.loc[0,:].values.tolist()))
+    col_names = dict(zip(df2.columns.tolist(), df2.loc[0, :].values.tolist()))
     df2.drop(index=0, inplace=True)
     df2.rename(columns=col_names, inplace=True)
-    df2.rename(columns={re.sub(r'[xls.]', '', files[z]): 'наименование_субъекта'}, inplace=True)
+    df2.rename(columns={re.sub(r'[xls.]', '', z): 'наименование_субъекта'}, inplace=True)
     df2.drop(index=df2[df2['число должностей штатных'].isin(
         ['штатных', 'Штатных', 'Число должностей', 'число должностей'])].index, inplace=True)
     df2.reset_index(drop=True, inplace=True)
@@ -68,46 +74,47 @@ def find_df2(df2, z):
     df2.reset_index(inplace=True, drop=True)
     for x, y in enumerate(df2.columns):
         if df2[y].dtypes == object:
-            df2[y] = df2[y].str.replace(',','.')
+            df2[y] = df2[y].str.replace(',', '.')
             try:
                 df2[y] = df2[y].astype(float)
             except:
                 continue
     return df2
 
+
 # формирования службы МК участие в ЧС
 def find_df3(df, z):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('наименование формиров') and \
-            (str(df.loc[x, '2']).lower().startswith('число формир') or
-                str(df.loc[x, '3']).lower().startswith('число формир') or
-                str(df.loc[x, '4']).lower().startswith('число формир')) and len(a) != 1:
+                (str(df.loc[x, '2']).lower().startswith('число формир') or
+                 str(df.loc[x, '3']).lower().startswith('число формир') or
+                 str(df.loc[x, '4']).lower().startswith('число формир')) and len(a) != 1:
             a.append(x)
         if type(y) == str and y.lower().startswith('прочие формиро'):
-            a.append(x+1)
+            a.append(x + 1)
         if len(a) == 2:
             break
     df3 = df[a[0]:a[-1]].copy()
     df3.dropna(axis=1, how='all', inplace=True)
     df3.reset_index(inplace=True, drop=True)
-    for x,y in enumerate(df3.loc[0,:]):
+    for x, y in enumerate(df3.loc[0, :]):
         if str(y).lower().startswith('наименование формир') and \
-        str(y).lower() != 'наименование_формирований':
+                str(y).lower() != 'наименование_формирований':
             df3.iloc[0, x] = 'наименование_формирований'
         if (str(y) in ['nan', 'NaN', 'Nan'] or str(y).lower().startswith('число формиро')) and \
-        df3.iloc[1, x].lower().startswith('всего'):
+                df3.iloc[1, x].lower().startswith('всего'):
             df3.iloc[0, x] = 'число_формирований_всего'
         if (str(y) in ['nan', 'NaN', 'Nan'] or str(y).lower().startswith('из них')) and \
-        (df3.iloc[1, x].lower().startswith('из них: штат') or df3.iloc[1, x].lower() == 'nan'):
+                (df3.iloc[1, x].lower().startswith('из них: штат') or df3.iloc[1, x].lower() == 'nan'):
             df3.iloc[0, x] = 'число_формирований_штатных'
         if str(y).lower().startswith('кол-во выездов') and df3.iloc[1, x].lower().startswith('всеми формир'):
             df3.iloc[0, x] = 'Выезды_на_ликвидацию_ЧС_всеми_формированиями'
         if str(y) in ['nan', 'NaN', 'Nan'] and df3.iloc[1, x].lower().startswith('из них штатн'):
             df3.iloc[0, x] = 'Выезды_на_ликвидацию_ЧС_штатными_формированиями'
-    col_names = dict(zip(df3.columns.tolist(), df3.loc[0,:].values.tolist()))
+    col_names = dict(zip(df3.columns.tolist(), df3.loc[0, :].values.tolist()))
     df3.rename(columns=col_names, inplace=True)
-    df3.rename(columns={re.sub(r'[xls.]', '', files[z]): 'наименование_субъекта'}, inplace=True)
+    df3.rename(columns={re.sub(r'[xls.]', '', z): 'наименование_субъекта'}, inplace=True)
     df3.drop(index=df3[df3['наименование_формирований'].isin(
         ['Наименование формирований', 'наименование формирований',
          'наименование_формирований'])].index, inplace=True)
@@ -117,24 +124,25 @@ def find_df3(df, z):
     df3.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df3.columns):
         if df3[y].dtypes == object:
-            df3[y] = df3[y].str.replace(',','.')
+            df3[y] = df3[y].str.replace(',', '.')
             try:
                 df3[y] = df3[y].astype(float)
             except:
                 continue
     return df3
 
+
 # пострадавшие в ЧС
-def find_df4(df, z):
+def find_df4(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('наименование чрезвы') and \
-            (str(df.loc[x, '2']).lower().startswith('число чс') or
-                str(df.loc[x, '3']).lower().startswith('число чс') or
-                str(df.loc[x, '4']).lower().startswith('число чс')) and len(a) != 1:
+                (str(df.loc[x, '2']).lower().startswith('число чс') or
+                 str(df.loc[x, '3']).lower().startswith('число чс') or
+                 str(df.loc[x, '4']).lower().startswith('число чс')) and len(a) != 1:
             a.append(x)
         if type(y) == str and y.lower().startswith('прочие чс'):
-            a.append(x+1)
+            a.append(x + 1)
         if len(a) == 2:
             break
     df4 = df[a[0]:a[-1]].copy()
@@ -142,7 +150,7 @@ def find_df4(df, z):
     df4.reset_index(inplace=True, drop=True)
     df4[df4.columns[0]] = df4[df4.columns[0]].str.rstrip(r'0123456789. :')
     df4[df4.columns[0]] = df4[df4.columns[0]].replace({'': np.nan})
-    for x,y in enumerate(df4['1']):
+    for x, y in enumerate(df4['1']):
         if str(y).lower().startswith('наименование чрезвычайных'):
             df4.drop(index=x, inplace=True)
         if str(y).lower().startswith('(4000)__'):
@@ -177,20 +185,21 @@ def find_df4(df, z):
             continue
     return df4
 
+
 # по видам оказанной помощи
-def find_df5(df, z):
+def find_df5(df):
     a = []
     for x, y in enumerate(df['1']):
         b = 0
         if type(y) == str and y.lower().lstrip().startswith(r'(4010)'):
             b += 1
         if type(y) == str and y.lower().lstrip().startswith('наименование чрезвы') and \
-            (str(df.loc[x, '2']).lower().startswith('число чс') or
-                str(df.loc[x, '3']).lower().startswith('число чс') or
-                str(df.loc[x, '4']).lower().startswith('число чс')) and b > 0 and len(a) > 1:
+                (str(df.loc[x, '2']).lower().startswith('число чс') or
+                 str(df.loc[x, '3']).lower().startswith('число чс') or
+                 str(df.loc[x, '4']).lower().startswith('число чс')) and b > 0 and len(a) > 1:
             a.append(x)
         elif type(y) == str and y.lower().startswith('прочие чс'):
-            a.append(x+1)
+            a.append(x + 1)
         if len(a) == 2:
             break
     df5 = df[a[0]:a[-1]].copy()
@@ -198,7 +207,7 @@ def find_df5(df, z):
     df5.reset_index(inplace=True, drop=True)
     df5[df5.columns[0]] = df5[df5.columns[0]].str.rstrip(r'0123456789. :')
     df5[df5.columns[0]] = df5[df5.columns[0]].replace({'': np.nan})
-    for x,y in enumerate(df5['1']):
+    for x, y in enumerate(df5['1']):
         if str(y).lower().startswith('наименование чрезвычайных'):
             df5.drop(index=x, inplace=True)
         if str(y).lower().startswith(r'(4010)__'):
@@ -232,18 +241,19 @@ def find_df5(df, z):
             continue
     return df5
 
+
 # ищем таблицу со сведениями о койках
-def find_df6(df, z):
+def find_df6(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('профиль коек') and \
-            (str(df.loc[x, '2']).lower().startswith('число среднегодовых коек') or
-                str(df.loc[x, '3']).lower().startswith('число среднегодовых коек') or
-                str(df.loc[x, '4']).lower().startswith('число среднегодовых коек')):
+                (str(df.loc[x, '2']).lower().startswith('число среднегодовых коек') or
+                 str(df.loc[x, '3']).lower().startswith('число среднегодовых коек') or
+                 str(df.loc[x, '4']).lower().startswith('число среднегодовых коек')):
             a.append(x)
         if type(y) == str and y.lower().startswith('прочие') and \
-        str(df.at[x-1, '1']).lower().startswith('реанимационные'):
-            a.append(x+1)
+                str(df.at[x - 1, '1']).lower().startswith('реанимационные'):
+            a.append(x + 1)
         if len(a) == 2:
             break
     df6 = df[a[0]:a[-1]].copy()
@@ -251,7 +261,7 @@ def find_df6(df, z):
     df6.reset_index(inplace=True, drop=True)
     df6[df6.columns[0]] = df6[df6.columns[0]].str.rstrip(r'0123456789. :')
     df6[df6.columns[0]] = df6[df6.columns[0]].replace({'': np.nan})
-    for x,y in enumerate(df6['1']):
+    for x, y in enumerate(df6['1']):
         if str(y).lower().startswith('профиль коек'):
             df6.drop(index=x, inplace=True)
     df6.dropna(subset=['1'], inplace=True)
@@ -276,26 +286,27 @@ def find_df6(df, z):
             continue
     return df6
 
+
 # сведения об лаборатории психофиз обеспечения ЦМК
-def find_df7(df, z):
+def find_df7(df, z, ):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('проведено психофизи') and \
-        'Проведена психокоррекция' in df.loc[x, :].values.tolist():
+                'Проведена психокоррекция' in df.loc[x, :].values.tolist():
             a.append(x)
         if type(y) == str and y.lower().startswith('проведено освидетель'):
-            a.append(x+5)
+            a.append(x + 5)
         if len(a) == 2:
             break
-    df7 = df[a[0]:a[-1]-5].copy()
-    df7_1 = df[a[-1]-5:a[-1]].copy()
+    df7 = df[a[0]:a[-1] - 5].copy()
+    df7_1 = df[a[-1] - 5:a[-1]].copy()
     df7.dropna(axis=1, how='all', inplace=True)
     df7_1.dropna(axis=1, how='all', inplace=True)
     df7.reset_index(drop=True, inplace=True)
     df7_1.reset_index(drop=True, inplace=True)
     a = 0
     for x, y in enumerate(df7_1.values):
-        for i,j in enumerate(df7_1.values[x]):
+        for i, j in enumerate(df7_1.values[x]):
             try:
                 isinstance(int(j), int)
                 a += 1
@@ -313,7 +324,7 @@ def find_df7(df, z):
     df7_2.reset_index(drop=True, inplace=True)
     a = 0
     for x, y in enumerate(df7.values):
-        for i,j in enumerate(df7.values[x]):
+        for i, j in enumerate(df7.values[x]):
             try:
                 isinstance(int(j), int)
                 a += 1
@@ -352,7 +363,7 @@ def find_df7(df, z):
         19: "Число_психпомощи_населению_в_ЧС",
         20: "Число_психпомощи_населению_ТМК_онлайн",
         21: "наименование_субъекта"}, inplace=True)
-    df7.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', files[z])
+    df7.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', z)
     for x, y in enumerate(df7.columns):
         if df7[y].dtypes == object:
             df7[y] = df7[y].str.replace(',', '.')
@@ -362,12 +373,13 @@ def find_df7(df, z):
             continue
     return df7
 
+
 # сведения об обучении
 def find_df8(df, z):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('проведено учебных циклов') and \
-        'Обучено слушателей' in df.loc[x, :].values.tolist():
+                'Обучено слушателей' in df.loc[x, :].values.tolist():
             a.append(x)
         if type(y) == str and y.lower().startswith('сведения о проведенных учениях'):
             a.append(x)
@@ -378,7 +390,7 @@ def find_df8(df, z):
     df8.reset_index(drop=True, inplace=True)
     a = 0
     for x, y in enumerate(df8.values):
-        for i,j in enumerate(df8.values[x]):
+        for i, j in enumerate(df8.values[x]):
             try:
                 isinstance(int(j), int)
                 a += 1
@@ -403,7 +415,7 @@ def find_df8(df, z):
         "6": "обучено_МВД_РФ",
         "7": "обучено_МПС_РФ",
         "8": "обучено_прочие"}, inplace=True)
-    df8_1.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', files[z])
+    df8_1.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', z)
     for x, y in enumerate(df8_1.columns):
         if df8_1[y].dtypes == object:
             df8_1[y] = df8_1[y].str.replace(',', '.')
@@ -413,15 +425,16 @@ def find_df8(df, z):
             continue
     return df8_1
 
+
 # поиск таблицы учений, занятий, тренировок
-def find_df9(df, z):
+def find_df9(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
-        y.lower().lstrip().startswith('техногенные чс - всего'):
+                y.lower().lstrip().startswith('техногенные чс - всего'):
             a.append(x)
         if type(y) == str and y.lower().startswith('всего') and len(a) > 0:
-            a.append(x+1)
+            a.append(x + 1)
         if len(a) == 2:
             break
     df9 = df[a[0]:a[-1]].copy()
@@ -442,17 +455,18 @@ def find_df9(df, z):
             continue
     return df9
 
+
 # поиск таблицы сведений о деятельности трассовых пунктов
-def find_df10(df, z):
+def find_df10(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
-        y.lower().lstrip().startswith('трассовые пункты всего'):
+                y.lower().lstrip().startswith('трассовые пункты всего'):
             a.append(x)
         if type(y) == str and \
-        y.lower().startswith('из них умерших во время санитарно-авиационной эвакуации всего') \
-        and len(a) > 0:
-            a.append(x+2)
+                y.lower().startswith('из них умерших во время санитарно-авиационной эвакуации всего') \
+                and len(a) > 0:
+            a.append(x + 2)
         if len(a) == 2:
             break
     df10 = df[a[0]:a[-1]].copy()
@@ -473,17 +487,18 @@ def find_df10(df, z):
             continue
     return df10
 
+
 # поиск таблицы сведения о материально-тех оснащении ЦМК
-def find_df11(df, z):
+def find_df11(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
-        y.lower().lstrip().startswith('автомобильный транспорт всего'):
+                y.lower().lstrip().startswith('автомобильный транспорт всего'):
             a.append(x)
         if type(y) == str and \
-        y.lower().startswith('аппарат узи переносной') and \
-        len(a) > 0:
-            a.append(x+1)
+                y.lower().startswith('аппарат узи переносной') and \
+                len(a) > 0:
+            a.append(x + 1)
         if len(a) == 2:
             break
     df11 = df[a[0]:a[-1]].copy()

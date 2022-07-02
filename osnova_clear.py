@@ -1,5 +1,6 @@
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings("ignore")
+#warnings.simplefilter(action='ignore', category=FutureWarning)
 DEBUG = True
 from other_function import clear_df
 
@@ -15,5 +16,6 @@ base_path = [r'/media/maks/ntfs/Ирина/диссер статистика/Ф.
              r'(2015-2020гг)/2019 г/ФОРМА 55/для программы',
              r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
              r'(2015-2020гг)/2020 г/ФОРМА 55/для программы']
-
-clear_df(base_path)
+print(base_path[0])
+for x in base_path:
+    clear_df(x)
