@@ -288,7 +288,7 @@ def find_df6(df):
 
 
 # сведения об лаборатории психофиз обеспечения ЦМК
-def find_df7(df, z, ):
+def find_df7(df, z):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and y.lower().lstrip().startswith('проведено психофизи') and \

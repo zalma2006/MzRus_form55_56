@@ -80,6 +80,8 @@ def clear_df(base_path):
         save_df(df9, r'Сведения_о_учениях_трениров_занят', y, base_path)
         save_df(df10, r'Сведения_о_трассовых_пунктах', y, base_path)
         save_df(df11, r'Сведения_о_МТО_МК', y, base_path)
+        if x in [20, 40, 60, 80]:
+            print(f'сделано {x} файлов')
     a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
     b = datetime.datetime.now() - start_time
     print(f'''Время затраченное на выполнение очищения и сохранения 55 формы отчётности
