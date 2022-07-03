@@ -52,7 +52,7 @@ def clear_df(base_path):
     files = [x for x in os.listdir() if x.endswith(('.xlsx', '.xls',))]
 
     for x, y in enumerate(files):
-        df = pd.read_excel(base_path + f'/{files[x]}', engine="openpyxl")
+        df = pd.read_excel(base_path + f'/{files[x]}', engine='openpyxl')
         df = drop_num(df)
         df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
         df7 = find_df7(df, y)
@@ -68,7 +68,7 @@ def clear_df(base_path):
         df6 = find_df6(df)
         df9 = find_df9(df)
         df10 = find_df10(df)
-        df11 = find_df11(df)
+        df11 = find_df11(df, y)
         save_df(df1, r'Табл_сведения_о_центре_МК', y, base_path)
         save_df(df2, r'Сведения_о_кадрах_мк', y, base_path)
         save_df(df3, r'Формирования_мк', y, base_path)
