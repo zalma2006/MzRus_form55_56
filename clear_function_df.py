@@ -302,7 +302,6 @@ def find_df7(df, z):
         df7 = pd.DataFrame({0: np.nan, 1: np.nan, 2: np.nan, 3: np.nan, 4: np.nan, 5: np.nan, 6: np.nan,
                             7: np.nan, 8: np.nan, 9: np.nan, 11: np.nan, 12: np.nan, 13: np.nan, 14: np.nan, 15: np.nan,
                             16: np.nan, 17: np.nan, 18: np.nan, 19: np.nan, 20: np.nan, 21: np.nan}, index=[0])
-        df7.loc[:, :] = np.nan
     else:
         df7 = df[a[0]:a[-1] - 5].copy()
         df7_1 = df[a[-1] - 5:a[-1]].copy()
@@ -347,7 +346,7 @@ def find_df7(df, z):
             df7_3.loc[0, :] = np.nan
         df7_3.reset_index(drop=True, inplace=True)
         df7 = pd.concat([df7_3, df7_2], axis=1, ignore_index=True)
-        df7.rename(columns={
+    df7.rename(columns={
             0: 'Проведен_психофизтест_всего',
             1: 'Проведен_психофизтест_сотруд_АСФ',
             2: 'Проведен_психофизтест_сотруд_СМК',
