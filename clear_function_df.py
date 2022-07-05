@@ -556,3 +556,29 @@ def find_df11(df, z):
         except:
             continue
     return df11
+def find_df56_1(df):
+    a = []
+    for x, y in enumerate(df['1']):
+        if type(y) == str and y.lower().lstrip().startswith('отделений всего'):
+            a.append(x)
+        if type(y) == str and y.lower().startswith('выездные бригады') and len(a) > 0:
+            a.append(x + 1)
+        if len(a) == 2:
+            break
+    df56_1 = df[a[0]:a[-1]].copy()
+    df56_1.dropna(axis=1, how='all', inplace=True)
+    df56_1.reset_index(drop=True, inplace=True)
+    df56_1.rename(columns={
+        '1': 'наименование_ЧС',
+        '2': 'Отметка'}, inplace=True)
+    for x, y in enumerate(df56_1.columns):
+        if df56_1[y].dtypes == object:
+            try:
+                df56_1[y] = df56_1[y].str.replace(',', '.')
+            except:
+                continue
+            try:
+                df56_1[y] = df56_1[y].astype(float)
+            except:
+                continue
+    return df56_1

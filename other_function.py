@@ -15,9 +15,6 @@ def drop_num(df):
                      (df['2'].isin(['2', 2, '12', 12])) &
                      (df['3'].isin(['3', 3, '13', 13]))].index, axis=0, inplace=True)
     df.reset_index(drop=True, inplace=True)
-    col_names = dict(zip(df.columns.tolist(),
-                         list(map(str, range(1, len(df.columns) + 1)))))
-    df.rename(columns=col_names, inplace=True)
     return df
 
 
