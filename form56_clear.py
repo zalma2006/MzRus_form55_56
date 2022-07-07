@@ -27,9 +27,19 @@ def find_df56_2(df):
     df56_2 = df[a[0]:a[-1]].copy()
     df56_2.dropna(axis=1, how='all', inplace=True)
     df56_2.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df56_2['1']):
+        if str(y).lower().startswith('врачи - в'):
+            df56_2 = df56_2[x:].copy()
+            break
     df56_2.rename(columns={
-        '1': 'наименование_ЧС',
-        '2': 'Отметка'}, inplace=True)
+        '1': 'наименование_должностей',
+        '2': 'число_штатных_должностей',
+        '3': 'число_занятых_должностей',
+        '4': 'числоФЛ_оснРаботников',
+        '5': 'имеют_статус_спасателя',
+        '6': 'имеют_ВысшКвалКатегорию',
+        '7': 'имеют_ПерКвалКатегорию',
+        '8': 'имеют_ВторКвалКатегорию'}, inplace=True)
     for x, y in enumerate(df56_2.columns):
         if df56_2[y].dtypes == object:
             try:
