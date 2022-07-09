@@ -153,7 +153,7 @@ def find_df4(df):
     for x, y in enumerate(df4['1']):
         if str(y).lower().startswith('наименование чрезвычайных'):
             df4.drop(index=x, inplace=True)
-        if str(y).lower().startswith('(4000)__'):
+        if str(y).lower().startswith(('(4000)', '\'(4000)')):
             df4.drop(index=x, inplace=True)
     df4.dropna(subset=['1'], inplace=True)
     df4.reset_index(inplace=True, drop=True)
@@ -624,3 +624,173 @@ def find_df56_2(df):
             except:
                 continue
     return df56_2
+
+
+def find_df56_3_2015(df):
+    a = []
+    for x, y in enumerate(df['1']):
+        if type(y) == str and \
+                y.lower().strip() == 'наименования':
+            a.append(x)
+        if type(y) == str and y.lower().startswith('медицинских грузов, тонны') and len(a) > 1:
+            a.append('stop')
+            a.append(x + 1)
+        if 'stop' in a:
+            break
+    df56_3 = df[a[0]:a[-1]].copy()
+    df56_3.dropna(axis=1, how='all', inplace=True)
+    df56_3.dropna(axis=0, subset=['1'], inplace=True)
+    df56_3.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df56_3['1']):
+        if y.lower().strip() == 'наименования':
+            df56_3.drop(index=[x], inplace=True)
+    df56_3.reset_index(drop=True, inplace=True)
+    df56_3.rename(columns={
+        '1': 'наименование',
+        '2': 'оказана_МП_всего',
+        '3': 'оказана_МП_детям',
+        '4': 'оказана_МП_ОснРаботниками',
+        '5': 'оказанаМПнаДогоспит_всего',
+        '6': 'оказанаМПнаДогоспит_детям',
+        '7': 'оказанаМПнаДогоспит_ПострадЧС_всего',
+        '8': 'оказанаМПнаДогоспит_ПострадЧС_детям',
+        '9': 'оказанаМПнаДогоспит_ПострадДТП_всего',
+        '10': 'оказанаМПнаДогоспит_ПострадДТП_детям',
+        '11': 'оказанаМПвСтационаре_всего',
+        '12': 'оказанаМПвСтационаре_детям',
+        '13': 'оказанаМПвСтационаре_ПострадЧС_всего',
+        '14': 'оказанаМПвСтационаре_ПострадЧС_детям',
+        '15': 'оказанаМПвСтационаре_ПострадДТП_всего',
+        '16': 'оказанаМПвСтационаре_ПострадДТП_детям'}, inplace=True)
+    df56_3['наименование'] = df56_3['наименование'].str.strip()
+    for x, y in enumerate(df56_3.columns):
+        if y not in ['наименование', 'наименование_субъекта']:
+            df56_3[y] = df56_3[y].astype(str)
+            df56_3[y] = df56_3[y].str.replace(',', '.')
+            df56_3[y] = df56_3[y].str.extract(r'(\d+)')
+            df56_3[y] = df56_3[y].astype(float)
+    return df56_3
+
+
+def find_df56_3_no2015(df):
+    a = []
+    for x, y in enumerate(df['1']):
+        if type(y) == str and \
+                str(y).lower().strip() == 'наименования':
+            a.append(x)
+        if type(y) == str and str(y).lower().startswith('медицинских грузов, тонны') and len(a) > 1:
+            a.append('stop')
+            a.append(x + 1)
+        if 'stop' in a:
+            break
+    df56_3_1 = df[a[0]:a[-1]].copy()
+    df56_3_1.dropna(axis=1, how='all', inplace=True)
+    df56_3_1.dropna(axis=0, subset=['1'], inplace=True)
+    df56_3_1.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df56_3_1['1']):
+        if str(y).lower().strip() == 'наименования':
+            df56_3_1.drop(index=[x], inplace=True)
+    df56_3_1.reset_index(drop=True, inplace=True)
+    a = []
+    for x, y in enumerate(df['1']):
+        if type(y) == str and \
+                str(y).lower().strip() == 'наименования' and \
+                str(df.at[x - 1, '1']).lower().strip().startswith('медицинских грузов'):
+            a.append(x)
+        if type(y) == str and str(y).lower().startswith('медицинских грузо') and len(a) > 0:
+            a.append(x + 1)
+        if len(a) == 2:
+            break
+    df56_3_2 = df[a[0]:a[-1]].copy()
+    df56_3_2.dropna(axis=1, how='all', inplace=True)
+    df56_3_2.dropna(axis=0, subset=['1'], inplace=True)
+    df56_3_2.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df56_3_2['1']):
+        if str(y).lower().strip() == 'наименования' or str(y).strip() == '1':
+            df56_3_2.drop(index=[x], inplace=True)
+    df56_3_2.reset_index(drop=True, inplace=True)
+    df56_3 = pd.concat([df56_3_1, df56_3_2], axis=1, ignore_index=True)
+    del df56_3[14], df56_3[15]
+    df56_3.rename(columns={
+        0: 'наименование',
+        1: 'оказана_МП_всего',
+        2: 'оказана_МП_детям',
+        3: 'оказана_МП_детям_до_года',
+        4: 'оказана_МП_ОснРаботниками',
+        5: 'оказана_МП_НаДогоспит_всего',
+        6: 'оказана_МП_НаДогоспит_детям',
+        7: 'оказана_МП_НаДогоспит_детям_до_года',
+        8: 'оказана_МП_НаДогоспит_ПострадЧС_всего',
+        9: 'оказана_МП_НаДогоспит_ПострадЧС_детям',
+        10: 'оказана_МП_НаДогоспит_ПострадЧС_детям_до_года',
+        11: 'оказана_МП_НаДогоспит_ПострадДТП_всего',
+        12: 'оказана_МП_НаДогоспит_ПострадДТП_детям',
+        13: 'оказана_МП_НаДогоспит_ПострадДТП_детям_до_года',
+        16: 'оказана_МП_НаСтационар_всего',
+        17: 'оказана_МП_НаСтационар_детям',
+        18: 'оказана_МП_НаСтационар_детям_до_года',
+        19: 'оказана_МП_НаСтационар_ПострадЧС_всего',
+        20: 'оказана_МП_НаСтационар_ПострадЧС_детям',
+        21: 'оказана_МП_НаСтационар_ПострадЧС_детям_до_года',
+        22: 'оказана_МП_НаСтационар_ПострадДТП_всего',
+        23: 'оказана_МП_НаСтационар_ПострадДТП_детям',
+        24: 'оказана_МП_НаСтационар_ПострадДТП_детям_до_года',
+        25: 'наименование_субъекта'}, inplace=True)
+    df56_3['наименование'] = df56_3['наименование'].str.strip()
+    for x, y in enumerate(df56_3.columns):
+        if y not in ['наименование', 'наименование_субъекта']:
+            df56_3[y] = df56_3[y].astype(str)
+            df56_3[y] = df56_3[y].str.replace(',', '.')
+            df56_3[y] = df56_3[y].str.extract(r'(\d+)')
+            df56_3[y] = df56_3[y].astype(float)
+    return df56_3
+
+
+def find_df56_4(df):
+    a = []
+    for x, y in enumerate(df['1']):
+        if type(y) == str and \
+                y.lower().strip() == 'профили медицинской помощи':
+            a.append(x)
+        if type(y) == str and y.lower().startswith('прочие') and len(a) > 0:
+            a.append('stop')
+            a.append(x + 1)
+        if 'stop' in a:
+            break
+    df56_4 = df[a[0]:a[-1]].copy()
+
+    df56_4.dropna(axis=1, how='all', inplace=True)
+    df56_4.dropna(axis=0, subset=['1'], inplace=True)
+    df56_4.reset_index(drop=True, inplace=True)
+    df56_4.drop(index=[0], inplace=True)
+    df56_4.reset_index(drop=True, inplace=True)
+    df56_4.rename(columns={
+        '1': 'профили_МП',
+        '2': 'оказана_ЭКМП_всего',
+        '3': 'оказана_ЭКМП_детям',
+        '4': 'оказана_ЭКМП_ПострадЧС_всего',
+        '5': 'оказана_ЭКМП_ПострадЧС_детям',
+        '6': 'эвакуировано_всего',
+        '7': 'эвакуировано_детей',
+        '8': 'эвакуировано_ПострадЧС_всего',
+        '9': 'эвакуировано_ПострадЧС_детей',
+        '10': 'эвакуировано_вРегМО_всего',
+        '11': 'эвакуировано_вРегМО_детей',
+        '12': 'эвакуировано_вРегМО_ПострадЧС_всего',
+        '13': 'эвакуировано_вРегМО_ПострадЧС_детей',
+        '14': 'эвакуировано_вМежРегМО_всего',
+        '15': 'эвакуировано_вМежРегМО_детей',
+        '16': 'эвакуировано_вМежРегМО_ПострадЧС_всего',
+        '17': 'эвакуировано_вМежРегМО_ПострадЧС_детей',
+        '18': 'эвакуировано_вФедМО_всего',
+        '19': 'эвакуировано_вФедМО_детей',
+        '20': 'эвакуировано_вФедМО_ПострадЧС_всего',
+        '21': 'эвакуировано_вФедМО_ПострадЧС_детей'}, inplace=True)
+    df56_4['профили_МП'] = df56_4['профили_МП'].str.strip()
+    for x, y in enumerate(df56_4.columns):
+        if y not in ['профили_МП', 'наименование_субъекта']:
+            df56_4[y] = df56_4[y].astype(str)
+            df56_4[y] = df56_4[y].str.replace(',', '.')
+            df56_4[y] = df56_4[y].str.extract(r'(\d+)')
+            df56_4[y] = df56_4[y].astype(float)
+    return df56_4
