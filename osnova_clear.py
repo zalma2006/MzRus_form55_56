@@ -1,5 +1,7 @@
 ##
+import re
 import warnings
+from typing import TextIO
 
 warnings.filterwarnings('ignore')
 DEBUG = True
@@ -34,7 +36,13 @@ if forma == 56:
                  r'(2015-2020гг)/2020 г/ФОРМА 56/для_программы']
 print(base_path)
 ##
+problems = {}
 for x in base_path:
-    clear_df(base_path=x, forma=forma)
+    c = ''.join(re.findall(r'\d+', x.split(r'/')[-3]))
+    problems[c] = clear_df(base_path=x, forma=forma, problems=problems)
+with open('problems.txt', 'w') as f:
+    for key, val in problems.items():
+        f.write(f'{key}: {val}\n')
 ##
-
+print(problems.keys())
+##

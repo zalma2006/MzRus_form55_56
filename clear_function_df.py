@@ -29,6 +29,11 @@ def find_df1(df, z):
     df1.loc[df1[df1[df1.columns[1]].isna()].index, df1.columns[1]] = 0
     df1.loc[df1[df1[df1.columns[1]].isin([1, '1'])].index, df1.columns[1]] = 1
     df1[df1.columns[1]] = df1[df1.columns[1]].astype(int)
+    for x, y in enumerate(df1.columns):
+        if y not in [df1.columns[0], 'наименование_субъекта']:
+            df1[y] = df1[y].astype(str)
+            df1[y] = df1[y].str.replace(',', '.')
+            df1[y] = df1[y].astype(float)
     return df1
 
 
@@ -73,12 +78,10 @@ def find_df2(df, z):
     df2.dropna(subset=df2.columns[0], inplace=True)
     df2.reset_index(inplace=True, drop=True)
     for x, y in enumerate(df2.columns):
-        if df2[y].dtypes == object:
+        if y not in [df2.columns[0], 'наименование_субъекта']:
+            df2[y] = df2[y].astype(str)
             df2[y] = df2[y].str.replace(',', '.')
-            try:
-                df2[y] = df2[y].astype(float)
-            except:
-                continue
+            df2[y] = df2[y].astype(float)
     return df2
 
 
@@ -123,12 +126,11 @@ def find_df3(df, z):
     df3.dropna(subset=df3.columns[0], inplace=True)
     df3.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df3.columns):
-        if df3[y].dtypes == object:
+        if y not in ['наименование_формирований', 'наименование_субъекта']:
+            df3[y] = df3[y].astype(str)
             df3[y] = df3[y].str.replace(',', '.')
-            try:
-                df3[y] = df3[y].astype(float)
-            except:
-                continue
+            df3[y] = df3[y].str.extract(r'(\d+)')
+            df3[y] = df3[y].astype(float)
     return df3
 
 
@@ -153,7 +155,7 @@ def find_df4(df):
     for x, y in enumerate(df4['1']):
         if str(y).lower().startswith('наименование чрезвычайных'):
             df4.drop(index=x, inplace=True)
-        if str(y).lower().startswith(('(4000)', '\'(4000)')):
+        if str(y).lower().startswith(('(4000)', '\'(4000)', 'продолжение')):
             df4.drop(index=x, inplace=True)
     df4.dropna(subset=['1'], inplace=True)
     df4.reset_index(inplace=True, drop=True)
@@ -177,12 +179,11 @@ def find_df4(df):
         '17': 'Число_поражённых_которым_оказана_первая_помощь_всего',
         '18': 'Число_поражённых_которым_оказана_первая_помощь_детей'}, inplace=True)
     for x, y in enumerate(df4.columns):
-        if df4[y].dtypes == object:
+        if y not in ['наименование_чрезвычайных_ситуаций', 'наименование_субъекта']:
+            df4[y] = df4[y].astype(str)
             df4[y] = df4[y].str.replace(',', '.')
-        try:
+            df4[y] = df4[y].str.extract(r'(\d+)')
             df4[y] = df4[y].astype(float)
-        except:
-            continue
     return df4
 
 
@@ -208,9 +209,7 @@ def find_df5(df):
     df5[df5.columns[0]] = df5[df5.columns[0]].str.rstrip(r'0123456789. :')
     df5[df5.columns[0]] = df5[df5.columns[0]].replace({'': np.nan})
     for x, y in enumerate(df5['1']):
-        if str(y).lower().startswith('наименование чрезвычайных'):
-            df5.drop(index=x, inplace=True)
-        if str(y).lower().startswith(r'(4010)__'):
+        if str(y).lower().startswith(('наименование чрезвычайных', '(4010)', '(4000)', 'продолжение')):
             df5.drop(index=x, inplace=True)
     df5.dropna(subset=['1'], inplace=True)
     df5.reset_index(inplace=True, drop=True)
@@ -233,12 +232,11 @@ def find_df5(df):
         '16': 'Число_погибших_в_медорганизации_всего',
         '17': 'Число_погибших_в_медорганизации_детей'}, inplace=True)
     for x, y in enumerate(df5.columns):
-        if df5[y].dtypes == object:
+        if y not in ['наименование_чрезвычайных_ситуаций', 'наименование_субъекта']:
+            df5[y] = df5[y].astype(str)
             df5[y] = df5[y].str.replace(',', '.')
-        try:
+            df5[y] = df5[y].str.extract(r'(\d+)')
             df5[y] = df5[y].astype(float)
-        except:
-            continue
     return df5
 
 
@@ -278,12 +276,10 @@ def find_df6(df):
         '9': 'Проведено_поражёнными_койко_дней'}, inplace=True)
 
     for x, y in enumerate(df6.columns):
-        if df6[y].dtypes == object:
+        if y not in ['профиль_коек', 'наименование_субъекта']:
+            df6[y] = df6[y].astype(str)
             df6[y] = df6[y].str.replace(',', '.')
-        try:
             df6[y] = df6[y].astype(float)
-        except:
-            continue
     return df6
 
 
@@ -448,7 +444,7 @@ def find_df9(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
-                y.lower().lstrip().startswith('техногенные чс - всего'):
+                y.lower().lstrip().startswith('наименование чрезвычайной ситуации'):
             a.append(x)
         if type(y) == str and y.lower().startswith('всего') and len(a) > 0:
             a.append(x + 1)
@@ -456,6 +452,9 @@ def find_df9(df):
             break
     df9 = df[a[0]:a[-1]].copy()
     df9.dropna(axis=1, how='all', inplace=True)
+    df9.dropna(axis=0, subset=['1'], inplace=True)
+    df9.reset_index(drop=True, inplace=True)
+    df9.drop(index=[0], inplace=True)
     df9.reset_index(drop=True, inplace=True)
     df9.rename(columns={
         '1': 'наименование_ЧС',
@@ -464,12 +463,11 @@ def find_df9(df):
         '4': 'число_УчТренЗанятий_ШТ',
         '5': 'число_УчТренЗанятий_ТСУ'}, inplace=True)
     for x, y in enumerate(df9.columns):
-        if df9[y].dtypes == object:
+        if y not in ['наименование_ЧС', 'наименование_субъекта']:
+            df9[y] = df9[y].astype(str)
             df9[y] = df9[y].str.replace(',', '.')
-        try:
+            df9[y] = df9[y].str.extract(r'(\d+)')
             df9[y] = df9[y].astype(float)
-        except:
-            continue
     return df9
 
 
