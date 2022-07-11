@@ -59,6 +59,10 @@ def clear_df(base_path, forma, problems):
             df = drop_num(df)
             df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
             df7 = find_df7(df, y)
+            if df7.shape[0] != 1 or df7.shape[1] != 21:
+                a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
+                b = re.sub(r'[xls.]', '', files[x])
+                problems[f'{b} - {a} - Сведения_о_лаборатории_мк'] = [f'его размеры {df7.shape}, а должны быть (1, 21)']
             df8 = find_df8(df, y)
             df = drop_num_2(df)
             del df[df.columns[-1]]
@@ -72,7 +76,7 @@ def clear_df(base_path, forma, problems):
             if df2.shape[0] != 43 or df2.shape[1] != 9:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df2.shape}, а должны быть (43, 9)']
+                problems[f'{b} - {a} - Сведения_о_кадрах_мк'] = [f'его размеры {df2.shape}, а должны быть (43, 9)']
             df3 = find_df3(df, y)
             if ((df3.shape[0] != 56 or df3.shape[1] != 6) and
                     (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or\
@@ -80,39 +84,42 @@ def clear_df(base_path, forma, problems):
                      (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2015')):
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df3.shape}, а должны быть '
-                                                                      f' для 2015 г (56, 6) а для 2016 г. (60, 6)']
+                problems[f'{b} - {a} - Формирования_мк'] = [f'его размеры {df3.shape}, а должны быть для 2015 г '
+                                                            f'(56, 6) а для 2016 г. (60, 6)']
             df4 = find_df4(df)
             if df4.shape[0] != 53 or df4.shape[1] != 19:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df4.shape}, '
-                                                                      f'а должны быть (53, 19)']
+                problems[f'{b} - {a} - Сведения_о_пострадавших_ЧС'] = [f'его размеры {df4.shape}, '
+                                                                       f'а должны быть (53, 19)']
             df5 = find_df5(df)
             if df5.shape[0] != 53 or df5.shape[1] != 18:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df5.shape}, '
-                                                                      f'а должны быть (53, 18)']
+                problems[f'{b} - {a} - Сведения_о_видах_помощи_вЧС'] = [f'его размеры {df5.shape}, '
+                                                                        f'а должны быть (53, 18)']
             df6 = find_df6(df)
             if df6.shape[0] != 17 or df6.shape[1] != 10:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df6.shape}, '
-                                                                      f'а должны быть (17, 10)']
+                problems[f'{b} - {a} - Использование_КФ_приЧС'] = [f'его размеры {df6.shape}, а должны быть (17, 10)']
             df9 = find_df9(df)
             if df9.shape[0] != 14 or df9.shape[1] != 6:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df9.shape}, '
-                                                                      f'а должны быть (14, 6)']
+                problems[f'{b} - {a} - Сведения_о_учениях_трениров_занят'] = [f'его размеры {df9.shape}, '
+                                                                              f'а должны быть (14, 6)']
             df10 = find_df10(df)
-            if df10.shape[0] != 14 or df10.shape[1] != 6:
+            if df10.shape[0] != 15 or df10.shape[1] != 3:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Табл_сведения_о_центре_МК'] = [f'его размеры {df10.shape}, '
-                                                                      f'а должны быть (14, 6)']
+                problems[f'{b} - {a} - Сведения_о_трассовых_пунктах'] = [f'его размеры {df10.shape}, '
+                                                                         f'а должны быть (15, 3)']
             df11 = find_df11(df, y)
+            if df11.shape[0] != 15 or df11.shape[1] != 3:
+                a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
+                b = re.sub(r'[xls.]', '', files[x])
+                problems[f'{b} - {a} - Сведения_о_МТО_МК'] = [f'его размеры {df11.shape}, а должны быть (15, 3)']
             save_df(df1, r'Табл_сведения_о_центре_МК', y, base_path, forma)
             save_df(df2, r'Сведения_о_кадрах_мк', y, base_path, forma)
             save_df(df3, r'Формирования_мк', y, base_path, forma)
@@ -190,8 +197,8 @@ def clear_df(base_path, forma, problems):
                              r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
                              r'(2015-2020гг)/2016 г/ФОРМА 56/для_программы']:
                 df56_4 = find_df56_4_1516(df)
-                if ((df56_4.shape[0] != 16 or df56_4.shape[1] != 22) and \
-                        (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or \
+                if ((df56_4.shape[0] != 16 or df56_4.shape[1] != 22) and
+                    (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or \
                         ((df56_4.shape[0] != 19 or df56_4.shape[1] != 22) and
                          (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2015')):
                     a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))

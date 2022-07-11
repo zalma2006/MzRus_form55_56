@@ -287,61 +287,34 @@ def find_df6(df):
 def find_df7(df, z):
     a = []
     for x, y in enumerate(df['1']):
-        if type(y) == str and y.lower().lstrip().startswith('проведено психофизи') and \
-                'Проведена психокоррекция' in df.loc[x, :].values.tolist():
+        if type(y) == str and y.lower().lstrip().startswith('проведен профессиональный'):
             a.append(x)
         if type(y) == str and y.lower().startswith('проведено освидетель'):
             a.append(x + 5)
         if len(a) == 2:
             break
-    if len(a) != 2:
-        df7 = pd.DataFrame({0: np.nan, 1: np.nan, 2: np.nan, 3: np.nan, 4: np.nan, 5: np.nan, 6: np.nan,
-                            7: np.nan, 8: np.nan, 9: np.nan, 11: np.nan, 12: np.nan, 13: np.nan, 14: np.nan, 15: np.nan,
-                            16: np.nan, 17: np.nan, 18: np.nan, 19: np.nan, 20: np.nan, 21: np.nan}, index=[0])
-    else:
-        df7 = df[a[0]:a[-1] - 5].copy()
-        df7_1 = df[a[-1] - 5:a[-1]].copy()
-        df7.dropna(axis=1, how='all', inplace=True)
-        df7_1.dropna(axis=1, how='all', inplace=True)
-        df7.reset_index(drop=True, inplace=True)
-        df7_1.reset_index(drop=True, inplace=True)
-        a = 0
-        for x, y in enumerate(df7_1.values):
-            for i, j in enumerate(df7_1.values[x]):
-                try:
-                    isinstance(int(j), int)
-                    a += 1
-                    df7_2 = pd.DataFrame(df7_1.loc[x, :]).T
-                except:
-                    if a > 0:
-                        break
-                    else:
-                        continue
-            if a > 0:
-                break
-        if 'df7_2' not in locals():
-            df7_2 = pd.DataFrame(df7_1.loc[0, :]).T
-            df7_2.loc[0, :] = np.nan
-        df7_2.reset_index(drop=True, inplace=True)
-        a = 0
-        for x, y in enumerate(df7.values):
-            for i, j in enumerate(df7.values[x]):
-                try:
-                    isinstance(int(j), int)
-                    a += 1
-                    df7_3 = pd.DataFrame(df7.loc[x, :]).T
-                except:
-                    if a > 0:
-                        break
-                    else:
-                        continue
-            if a > 0:
-                break
-        if 'df7_3' not in locals():
-            df7_3 = pd.DataFrame(df7_1.loc[0, :]).T
-            df7_3.loc[0, :] = np.nan
-        df7_3.reset_index(drop=True, inplace=True)
-        df7 = pd.concat([df7_3, df7_2], axis=1, ignore_index=True)
+    df7 = df[a[0]:a[-1] - 5].copy()
+    df7_1 = df[a[-1] - 5:a[-1]].copy()
+    df7.dropna(axis=1, how='all', inplace=True)
+    df7_1.dropna(axis=1, how='all', inplace=True)
+    df7.reset_index(drop=True, inplace=True)
+    df7_1.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df7['1']):
+        if str(y).lower().strip().startswith(('проведен профессиональный', 'проведено психофизио', 'всего', '(6000)')):
+            df7.drop(index=[x], inplace=True)
+    df7.dropna(inplace=True, axis=0, subset=['1'])
+    df7.reset_index(inplace=True, drop=True)
+    if df7.shape[0] == 0:
+        df7.loc[0, :] = np.nan
+    del df7['наименование_субъекта']
+    for x, y in enumerate(df7_1['1']):
+        if str(y).lower().strip().startswith(('проведено освидетельст', 'всего', '(6000)', '19.03.20')):
+            df7_1.drop(index=[x], inplace=True)
+    df7_1.dropna(inplace=True, axis=0, subset=['1'])
+    df7_1.reset_index(inplace=True, drop=True)
+    if df7_1.shape[0] == 0:
+        df7_1.loc[0, :] = np.nan
+    df7 = pd.concat([df7, df7_1], ignore_index=True, axis=1)
     df7.rename(columns={
         0: 'Проведен_психофизтест_всего',
         1: 'Проведен_психофизтест_сотруд_АСФ',
@@ -353,25 +326,22 @@ def find_df7(df, z):
         7: 'Проведена_психокоррекция_сотруд_АСФ',
         8: 'Проведена_психокоррекция_сотруд_СМК',
         9: 'Проведена_психокоррекция_волонтёров',
-        11: 'Проведено_освидетел_всего',
-        12: 'Проведено_освидетел_сотруд_АСФ',
-        13: 'Проведено_освидетел_сотруд_СМК',
-        14: 'Прошедшие_психреабилитацию_всего',
-        15: 'Прошедшие_психреабилитацию_сотруд_АСФ',
-        16: 'Прошедшие_психреабилитацию_сотруд_СМК',
-        17: 'Прошедшие_психреабилитацию_прочие',
-        18: 'Число_психпомощи_населению_в_повседдеятельности',
-        19: 'Число_психпомощи_населению_в_ЧС',
-        20: 'Число_психпомощи_населению_ТМК_онлайн',
-        21: 'наименование_субъекта'}, inplace=True)
-    df7.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', z)
+        10: 'Проведено_освидетел_всего',
+        11: 'Проведено_освидетел_сотруд_АСФ',
+        12: 'Проведено_освидетел_сотруд_СМК',
+        13: 'Прошедшие_психреабилитацию_всего',
+        14: 'Прошедшие_психреабилитацию_сотруд_АСФ',
+        15: 'Прошедшие_психреабилитацию_сотруд_СМК',
+        16: 'Прошедшие_психреабилитацию_прочие',
+        17: 'Число_психпомощи_населению_в_повседдеятельности',
+        18: 'Число_психпомощи_населению_в_ЧС',
+        19: 'Число_психпомощи_населению_ТМК_онлайн',
+        20: 'наименование_субъекта'}, inplace=True)
     for x, y in enumerate(df7.columns):
-        if df7[y].dtypes == object:
+        if y != 'наименование_субъекта':
+            df7[y] = df7[y].astype(str)
             df7[y] = df7[y].str.replace(',', '.')
-        try:
             df7[y] = df7[y].astype(float)
-        except:
-            continue
     return df7
 
 
@@ -476,7 +446,7 @@ def find_df10(df):
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
-                y.lower().lstrip().startswith('трассовые пункты всего'):
+                y.lower().lstrip().startswith('показатели'):
             a.append(x)
         if type(y) == str and \
                 y.lower().startswith('из них умерших во время санитарно-авиационной эвакуации всего') \
@@ -487,19 +457,16 @@ def find_df10(df):
     df10 = df[a[0]:a[-1]].copy()
     df10.dropna(axis=1, how='all', inplace=True)
     df10.reset_index(drop=True, inplace=True)
-    if '2' not in df10.columns:
-        df10['2'] = np.nan
-        df10 = df10[['1', '2', 'наименование_субъекта']]
+    df10.drop(index=[0], inplace=True)
+    df10.dropna(subset=['1'], inplace=True)
     df10.rename(columns={
         '1': 'показатели_о_деят_трасспунктов',
         '2': 'число'}, inplace=True)
     for x, y in enumerate(df10.columns):
-        if df10[y].dtypes == object:
+        if y not in ['показатели_о_деят_трасспунктов', 'наименование_субъекта']:
+            df10[y] = df10[y].astype(str)
             df10[y] = df10[y].str.replace(',', '.')
-        try:
             df10[y] = df10[y].astype(float)
-        except:
-            continue
     return df10
 
 
