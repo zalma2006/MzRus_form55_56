@@ -58,12 +58,23 @@ def clear_df(base_path, forma, problems):
             df = pd.read_excel(base_path + f'/{files[x]}', engine='openpyxl')
             df = drop_num(df)
             df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
-            df7 = find_df7(df, y)
-            if df7.shape[0] != 1 or df7.shape[1] != 21:
-                a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
-                b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Сведения_о_лаборатории_мк'] = [f'его размеры {df7.shape}, а должны быть (1, 21)']
-            df8 = find_df8(df, y)
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015':
+                df7 = find_df7(df, y)
+                if df7.shape[0] != 1 or df7.shape[1] != 21:
+                    a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
+                    b = re.sub(r'[xls.]', '', files[x])
+                    problems[f'{b} - {a} - Сведения_о_лаборатории_мк'] = [f'его размеры {df7.shape}, '
+                                                                          f'а должны быть (1, 21)']
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2016':
+                df8 = find_df8(df=df, z=y, base_path=base_path)
+                if ((df8.shape[0] != 1 or df8.shape[1] != 9) and
+                    (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or \
+                        ((df8.shape[0] != 1 or df8.shape[1] != 11) and
+                         (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) not in ['2015', '2016'])):
+                    a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
+                    b = re.sub(r'[xls.]', '', files[x])
+                    problems[f'{b} - {a} - сведения_об_обучении'] = [f'его размеры {df8.shape}, а должны быть для 2015 '
+                                                                     f'г (1, 9) а для остальных кроме 2016 г. (1, 11)']
             df = drop_num_2(df)
             del df[df.columns[-1]]
             df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
@@ -115,22 +126,26 @@ def clear_df(base_path, forma, problems):
                 b = re.sub(r'[xls.]', '', files[x])
                 problems[f'{b} - {a} - Сведения_о_трассовых_пунктах'] = [f'его размеры {df10.shape}, '
                                                                          f'а должны быть (15, 3)']
-            df11 = find_df11(df, y)
-            if df11.shape[0] != 15 or df11.shape[1] != 3:
-                a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
-                b = re.sub(r'[xls.]', '', files[x])
-                problems[f'{b} - {a} - Сведения_о_МТО_МК'] = [f'его размеры {df11.shape}, а должны быть (15, 3)']
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015':
+                df11 = find_df11(df, y)
+                if df11.shape[0] != 15 or df11.shape[1] != 3:
+                    a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
+                    b = re.sub(r'[xls.]', '', files[x])
+                    problems[f'{b} - {a} - Сведения_о_МТО_МК'] = [f'его размеры {df11.shape}, а должны быть (15, 3)']
             save_df(df1, r'Табл_сведения_о_центре_МК', y, base_path, forma)
             save_df(df2, r'Сведения_о_кадрах_мк', y, base_path, forma)
             save_df(df3, r'Формирования_мк', y, base_path, forma)
             save_df(df4, r'Сведения_о_пострадавших_ЧС', y, base_path, forma)
             save_df(df5, r'Сведения_о_видах_помощи_вЧС', y, base_path, forma)
             save_df(df6, r'Использование_КФ_приЧС', y, base_path, forma)
-            save_df(df7, r'Сведения_о_лаборатории_мк', y, base_path, forma)
-            save_df(df8, r'Сведения_о_обучении', y, base_path, forma)
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015':
+                save_df(df7, r'Сведения_о_лаборатории_мк', y, base_path, forma)
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2016':
+                save_df(df8, r'Сведения_о_обучении', y, base_path, forma)
             save_df(df9, r'Сведения_о_учениях_трениров_занят', y, base_path, forma)
             save_df(df10, r'Сведения_о_трассовых_пунктах', y, base_path, forma)
-            save_df(df11, r'Сведения_о_МТО_МК', y, base_path, forma)
+            if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015':
+                save_df(df11, r'Сведения_о_МТО_МК', y, base_path, forma)
             if x in [20, 40, 60, 80]:
                 print(f'сделано {x} файлов')
         a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
