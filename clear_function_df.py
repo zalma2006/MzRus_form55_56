@@ -209,7 +209,8 @@ def find_df5(df):
     df5[df5.columns[0]] = df5[df5.columns[0]].str.rstrip(r'0123456789. :')
     df5[df5.columns[0]] = df5[df5.columns[0]].replace({'': np.nan})
     for x, y in enumerate(df5['1']):
-        if str(y).lower().startswith(('наименование чрезвычайных', '(4010)', '(4000)', 'продолжение')):
+        if str(y).lower().startswith(('наименование чрезвычайных', '(4010)', '(4000)', 'продолжение', 'число',
+                                      'виды оказанной медицинской')):
             df5.drop(index=x, inplace=True)
     df5.dropna(subset=['1'], inplace=True)
     df5.reset_index(inplace=True, drop=True)
@@ -283,7 +284,7 @@ def find_df6(df):
     return df6
 
 
-# сведения об лаборатории психофиз обеспечения ЦМК
+# сведения о лаборатории психофиз обеспечения ЦМК
 def find_df7(df, z):
     a = []
     for x, y in enumerate(df['1']):
@@ -300,7 +301,8 @@ def find_df7(df, z):
     df7.reset_index(drop=True, inplace=True)
     df7_1.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df7['1']):
-        if str(y).lower().strip().startswith(('проведен профессиональный', 'проведено психофизио', 'всего', '(6000)')):
+        if str(y).lower().strip().startswith(('проведен профессиональный', 'проведено психофизио', 'всего', '(6000)',
+                                              'продолжение')):
             df7.drop(index=[x], inplace=True)
     df7.dropna(inplace=True, axis=0, subset=['1'])
     df7.reset_index(inplace=True, drop=True)
@@ -308,7 +310,8 @@ def find_df7(df, z):
         df7.loc[0, :] = np.nan
     del df7['наименование_субъекта']
     for x, y in enumerate(df7_1['1']):
-        if str(y).lower().strip().startswith(('проведено освидетельст', 'всего', '(6000)', '19.03.20')):
+        if str(y).lower().strip().startswith(('проведено освидетельст', 'всего', '(6000)', '19.03.20', '15.03.20',
+                                              'продолжение', 'сведения о проведени', '(7000)')):
             df7_1.drop(index=[x], inplace=True)
     df7_1.dropna(inplace=True, axis=0, subset=['1'])
     df7_1.reset_index(inplace=True, drop=True)
@@ -346,67 +349,76 @@ def find_df7(df, z):
 
 
 # сведения об обучении
-def find_df8(df, z):
+def find_df8(df, z, base_path):
     a = []
-    for x, y in enumerate(df['1']):
-        if type(y) == str and y.lower().lstrip().startswith('проведено учебных циклов') and \
-                'Обучено слушателей' in df.loc[x, :].values.tolist():
-            a.append(x)
-        if type(y) == str and y.lower().startswith('сведения о проведенных учениях'):
-            a.append(x)
-        if len(a) == 2:
-            break
-    if len(a) != 2:
-        df8 = pd.DataFrame({'1': np.nan,
-                            '2': np.nan,
-                            '3': np.nan,
-                            '4': np.nan,
-                            '5': np.nan,
-                            '6': np.nan,
-                            '7': np.nan,
-                            '8': np.nan,
-                            'наименование_субъекта': np.nan}, index=[0])
-        df8.loc[:, :] = np.nan
-    else:
-        df8 = df[a[0]:a[-1]].copy()
+    year = re.findall('\d+', base_path.split('/')[-3])[0]
+    if year == '2015':
+        for x, y in enumerate(df['1']):
+            if type(y) == str and y.lower().lstrip().startswith('проведено учебных цик'):
+                a.append(x)
+            if type(y) == str and y.lower().startswith('сведения о проведенных учениях'):
+                a.append(x)
+            if len(a) == 2:
+                break
+        df8 = df[a[0]:a[-1]].copy().reset_index(drop=True)
         df8.dropna(axis=1, how='all', inplace=True)
-    df8.reset_index(drop=True, inplace=True)
-    a = 0
-    for x, y in enumerate(df8.values):
-        for i, j in enumerate(df8.values[x]):
-            try:
-                isinstance(int(j), int)
-                a += 1
-                df8_1 = pd.DataFrame(df8.loc[x, :]).T
-            except:
-                if a > 0:
-                    break
-                else:
-                    continue
-        if a > 0:
-            break
-    if 'df8_1' not in locals():
-        df8_1 = pd.DataFrame(df8.loc[0, :]).T
-        df8_1.loc[0, :] = np.nan
-    df8_1.reset_index(drop=True, inplace=True)
-    df8_1.rename(columns={
-        '1': 'проведено_учебных_циклов',
-        '2': 'обучено_всего',
-        '3': 'обучено_оргздав',
-        '4': 'обучено_СМП',
-        '5': 'обучено_МЧС_РФ',
-        '6': 'обучено_МВД_РФ',
-        '7': 'обучено_МПС_РФ',
-        '8': 'обучено_прочие'}, inplace=True)
-    df8_1.loc[0, 'наименование_субъекта'] = re.sub(r'[xls.]', '', z)
-    for x, y in enumerate(df8_1.columns):
-        if df8_1[y].dtypes == object:
-            df8_1[y] = df8_1[y].str.replace(',', '.')
-        try:
-            df8_1[y] = df8_1[y].astype(float)
-        except:
-            continue
-    return df8_1
+        df8.dropna(subset=['1'], inplace=True)
+        df8 = df8.drop(index=[0]).reset_index(drop=True)
+        df8.rename(columns={
+            '1': 'проведено_учебных_циклов',
+            '2': 'обучено_всего',
+            '3': 'обучено_ОргЗдрав',
+            '4': 'обучено_СотрудниковСМП',
+            '5': 'обучено_СотрудМЧС',
+            '6': 'обучено_СотрудМВД',
+            '7': 'обучено_СотрудМСП',
+            '8': 'обучено_прочих'}, inplace=True)
+        if df8.shape[0] == 0:
+            df8.loc[0, :] = 0
+            df8.iat[0, -1] = z
+        for x in df8.columns:
+            if x != 'наименование_субъекта':
+                df8[x] = df8[x].astype(str)
+                df8[x] = df8[x].str.replace(',', '.')
+                df8[x] = df8[x].astype(float)
+    elif year in ['2017', '2018', '2019', '2020']:
+        for x, y in enumerate(df['1']):
+            if type(y) == str and y.lower().lstrip().startswith('проведено учебных цик'):
+                a.append(x)
+            if type(y) == str and y.lower().startswith('сведения о проведенных учениях'):
+                a.append(x)
+            if len(a) == 2:
+                break
+        df8 = df[a[0]:a[-1]].copy().reset_index(drop=True)
+        df8.dropna(axis=1, how='all', inplace=True)
+        df8 = df8.dropna(subset=['1']).reset_index(drop=True)
+        for x, y in enumerate(df8['1']):
+            if str(y).lstrip().lower().startswith(('всего', 'проведено учебны')):
+                df8.drop(index=[x], inplace=True)
+        df8.reset_index(inplace=True, drop=True)
+        df8.rename(columns={
+            '1': 'проведено_учебных_циклов_всего',
+            '2': 'проведено_учебных_циклов_выездных',
+            '3': 'обучено_оказания_ПМ_всего',
+            '4': 'обучено_оказания_ПМ_МЧС',
+            '5': 'обучено_оказания_ПМ_МВД',
+            '6': 'обучено_оказания_ПМ_СМП',
+            '7': 'обучено_оказания_ПМ_МедрабПрочих',
+            '8': 'обучено_оказания_ПМ_водителей',
+            '9': 'обучено_оказания_ПМ_прочие',
+            '10': 'число_ЗадействПрепод'}, inplace=True)
+
+        if df8.shape[0] == 0:
+            df8.loc[0, :] = 0
+            df8.iat[0, -1] = z
+        for x in df8.columns:
+            if x != 'наименование_субъекта':
+                df8[x] = df8[x].astype(str)
+                df8[x] = df8[x].str.replace(',', '.')
+                df8[x] = df8[x].astype(float)
+    else:
+        pass
+    return df8
 
 
 # поиск таблицы учений, занятий, тренировок
@@ -483,43 +495,20 @@ def find_df11(df, z):
             a.append(x + 1)
         if len(a) == 2:
             break
-    if len(a) != 2:
-        df11 = pd.DataFrame({'1': [
-            'Автомобильный транспорт всего',
-            'Авиационный транспорт всего',
-            'Вертолетные площадки',
-            'Средства связи, всего, из них:',
-            'Радиостанции',
-            'Мобильная связь(сотовые телефоны)',
-            'Спутниковые телефоны',
-            'Высокоскоростная спутниковая связь'
-            'Система мобильных телемедицинских консультаций',
-            'Медицинское оборудование, всего, из них:',
-            'Электрокардиограф',
-            'Эхоэнцефалоскоп',
-            'Манипуляционный цистоскоп',
-            'Фибробронхоскоп',
-            'Аппарат УЗИ переносной'],
-            '2': np.nan,
-            'наименование_субъекта': re.sub(r'[xls.]', '', z)})
-        df11.loc[:, ['1', '2']] = np.nan
-    else:
-        df11 = df[a[0]:a[-1]].copy()
-        df11.dropna(axis=1, how='all', inplace=True)
-        df11.reset_index(drop=True, inplace=True)
-        if '2' not in df11.columns:
-            df11['2'] = np.nan
-            df11 = df11[['1', '2', 'наименование_субъекта']]
+    df11 = df[a[0]:a[-1]].copy()
+    df11.dropna(axis=1, how='all', inplace=True)
+    df11.reset_index(drop=True, inplace=True)
+    if '2' not in df11.columns:
+        df11['2'] = np.nan
+        df11 = df11[['1', '2', 'наименование_субъекта']]
     df11.rename(columns={
         '1': 'наименование_МТО',
         '2': 'число_единиц'}, inplace=True)
     for x, y in enumerate(df11.columns):
-        if df11[y].dtypes == object:
+        if y == 'число_единиц':
+            df11[y] = df11[y].astype(str)
             df11[y] = df11[y].str.replace(',', '.')
-        try:
             df11[y] = df11[y].astype(float)
-        except:
-            continue
     return df11
 
 
