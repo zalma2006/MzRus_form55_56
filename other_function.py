@@ -1,9 +1,14 @@
 # удаляем из таблицы строки с номерами столбцов в каждой
-# из таблиц для таблиц у которых нет столбца с номерами строк: таблица 7
+# из таблиц у которых нет столбца с номерами строк:
 import pandas as pd
 import datetime
 import os
 from clear_function_df import *
+
+
+def year_col(df, base_path):
+    df['год'] = int(''.join(re.findall(r'\d+', base_path.split(r'/')[-3])))
+    return df
 
 
 def drop_num(df):
@@ -65,6 +70,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Сведения_о_лаборатории_мк'] = [f'его размеры {df7.shape}, '
                                                                           f'а должны быть (1, 21)']
+                df7 = year_col(df=df7, base_path=base_path)
             if ''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2016':
                 df8 = find_df8(df=df, z=y, base_path=base_path)
                 if ((df8.shape[0] != 1 or df8.shape[1] != 9) and
@@ -75,6 +81,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - сведения_об_обучении'] = [f'его размеры {df8.shape}, а должны быть для 2015 '
                                                                      f'г (1, 9) а для остальных кроме 2016 г. (1, 11)']
+                df8 = year_col(df=df8, base_path=base_path)
             df = drop_num_2(df)
             del df[df.columns[-1]]
             df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
@@ -90,7 +97,7 @@ def clear_df(base_path, forma, problems):
                 problems[f'{b} - {a} - Сведения_о_кадрах_мк'] = [f'его размеры {df2.shape}, а должны быть (43, 9)']
             df3 = find_df3(df, y)
             if ((df3.shape[0] != 56 or df3.shape[1] != 6) and
-                    (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or\
+                (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or \
                     ((df3.shape[0] != 60 or df3.shape[1] != 6) and
                      (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2015')):
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
@@ -132,6 +139,16 @@ def clear_df(base_path, forma, problems):
                     a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Сведения_о_МТО_МК'] = [f'его размеры {df11.shape}, а должны быть (15, 3)']
+                df11 = year_col(df=df11, base_path=base_path)
+            df1 = year_col(df=df1, base_path=base_path)
+            df2 = year_col(df=df2, base_path=base_path)
+            df3 = year_col(df=df3, base_path=base_path)
+            df4 = year_col(df=df4, base_path=base_path)
+            df5 = year_col(df=df5, base_path=base_path)
+            df6 = year_col(df=df6, base_path=base_path)
+            df9 = year_col(df=df9, base_path=base_path)
+            df10 = year_col(df=df10, base_path=base_path)
+
             save_df(df1, r'Табл_сведения_о_центре_МК', y, base_path, forma)
             save_df(df2, r'Сведения_о_кадрах_мк', y, base_path, forma)
             save_df(df3, r'Формирования_мк', y, base_path, forma)
@@ -167,6 +184,8 @@ def clear_df(base_path, forma, problems):
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
                 problems[f'{b} - {a} - Сведения_отдЭКМПиМЭ'] = [f'его размеры {df56_1.shape}, а должны быть (13, 3)']
+
+            df56_1 = year_col(df=df56_1, base_path=base_path)
             df56_2 = find_df56_2(df)
             if df56_2.shape[0] != 19 or df56_2.shape[1] != 9:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
@@ -182,6 +201,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Деятельность_отдЭКМПиМЭ'] = [f'его размеры {df56_3.shape}, '
                                                                         f'а должны быть (23, 24)']
+            df56_2 = year_col(df=df56_2, base_path=base_path)
             if base_path == r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 ' \
                             r'(2015-2020гг)/Ф.55,56 (2015-2020гг)/2015 г/ФОРМА 56/для_программы':
                 df56_3 = find_df56_3_2015(df)
@@ -190,6 +210,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Деятельность_отдЭКМПиМЭ'] = [f'его размеры {df56_3.shape}, '
                                                                         f'а должны быть (30, 17)']
+                df56_3 = year_col(df=df56_3, base_path=base_path)
             if base_path == r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 ' \
                             r'(2015-2020гг)/2016 г/ФОРМА 56/для_программы':
                 df56_3 = find_df56_3_2016(df=df, z=y)
@@ -198,6 +219,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Деятельность_отдЭКМПиМЭ'] = [f'его размеры {df56_3.shape}, '
                                                                         f'а должны быть (25, 24)']
+                df56_3 = year_col(df=df56_3, base_path=base_path)
             if base_path not in [r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
                                  r'(2015-2020гг)/2015 г/ФОРМА 56/для_программы',
                                  r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
@@ -207,6 +229,7 @@ def clear_df(base_path, forma, problems):
                     a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Выезды_отдЭКМПиМЭ'] = [f'его размеры {df56_4.shape}, а должны быть (16, 32)']
+                df56_4 = year_col(df=df56_4, base_path=base_path)
             if base_path in [r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
                              r'(2015-2020гг)/2015 г/ФОРМА 56/для_программы',
                              r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 '
@@ -220,6 +243,7 @@ def clear_df(base_path, forma, problems):
                     b = re.sub(r'[xls.]', '', files[x])
                     problems[f'{b} - {a} - Выезды_отдЭКМПиМЭ'] = [f'его размеры {df56_4.shape}, а должны быть (16, 22) '
                                                                   f'в 2015 году и (19, 22) в 2016 году']
+                df56_4 = year_col(df=df56_4, base_path=base_path)
 
             save_df(df=df56_1, papka=r'Сведения_отдЭКМПиМЭ', z=y, base_path=base_path, forma=forma)
             save_df(df=df56_2, papka=r'Кадры_отдЭКМПиМЭ', z=y, base_path=base_path, forma=forma)

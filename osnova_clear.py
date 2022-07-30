@@ -7,7 +7,7 @@ warnings.filterwarnings('ignore')
 DEBUG = True
 from other_function import clear_df
 
-forma = 55
+forma = 56
 if forma == 55:
     base_path = [r'/media/maks/ntfs/Ирина/диссер статистика/Ф.55,56 (2015-2020гг)/Ф.55,56 (2015-2020гг)/2015 '
                  r'г/ФОРМА 55/для программы',

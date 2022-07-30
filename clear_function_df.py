@@ -317,6 +317,7 @@ def find_df7(df, z):
     df7_1.reset_index(inplace=True, drop=True)
     if df7_1.shape[0] == 0:
         df7_1.loc[0, :] = np.nan
+        df7_1.iloc[0, -1] = re.sub(r'[xls.]', '', z)
     df7 = pd.concat([df7, df7_1], ignore_index=True, axis=1)
     df7.rename(columns={
         0: 'Проведен_психофизтест_всего',
