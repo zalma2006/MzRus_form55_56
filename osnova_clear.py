@@ -16,7 +16,9 @@ def choise_work():
         pr_str_4 = 'Введите 4 если хотите удалить файлы 56 формы'
         pr_str_5 = 'Введите 5 если хотите создать папки для 55 формы'
         pr_str_6 = 'Введите 6 если хотите создать папки для 56 формы'
-        pr_str_7 = 'Введите 7 если хотите выйти из программы'
+        pr_str_7 = 'Введите 7 если хотите перенести файлы по группам'
+        pr_str_8 = 'Введите 8 если хотите выйти из программы'
+
         print('-' * 60)
         print(f'{pr_str_1:>60}')
         print(f'{pr_str_2:>60}')
@@ -25,6 +27,7 @@ def choise_work():
         print(f'{pr_str_5:>60}')
         print(f'{pr_str_6:>60}')
         print(f'{pr_str_7:>60}')
+        print(f'{pr_str_8:>60}')
         print('-' * 60)
         choise = int(input())
         if choise == 1:
@@ -93,6 +96,16 @@ def choise_work():
                           papka_files2=papka_files2)
             break
         elif choise == 7:
+            from move_files import move_dir, base_path
+            from rename_files import fly_yes_llc_group, fly_no_llc_group, no_fly_group
+            import shutil
+            error_dict = move_dir(base_path=base_path)
+            choise_error = int(input('Введите 1 если хотите ли вы посмотреть словарь с ошибками: '))
+            if choise_error == 1:
+                print(error_dict)
+            else:
+                break
+        elif choise == 8:
             break
         else:
             print('Вы не выбрали действие!')
