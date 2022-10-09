@@ -54,17 +54,3 @@ def del_folder(base_path, form, papka_files1, papka_files2):
             else:
                 continue
 
-
-# def create_or_del():
-#     while True:
-#         choise = int(input('Введите 1 если хотите создать папки для файлов, или 2 если хотите удалить папки '
-#                            'с файлами '))
-#         if choise == 1:
-#             create_folder(base_path=base_path, form=form, papka_files1=papka_files1,
-#                           papka_files2=papka_files2, folder_list=folder_list)
-#             break
-#         elif choise == 2:
-#             del_folder(base_path=base_path, form=form, papka_files1=papka_files1, papka_files2=papka_files2)
-#             break
-#         else:
-#             print('Вы не выбрали действие')

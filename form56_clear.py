@@ -9,7 +9,7 @@ from other_function import drop_num, drop_num_2
 forma = 55
 if forma == 55:
     base_path = choise_paths(forma=55)
-    os.chdir(base_path[0] + r'/переработанные файлы')
+    os.chdir(base_path[0] + r'/переработанные_файлы')
     for folder in os.listdir():
         folder_path = os.getcwd()
         os.chdir(folder_path + f'/{folder}')
