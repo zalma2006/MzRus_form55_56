@@ -48,7 +48,6 @@ class Grouper:
     """
 
     def __init__(self, path, df):
-
         self.path: str = path
         self.form: str = self.path.split('/')[-2]
         self.groups: str = self.path.split('/')[-1]
@@ -116,7 +115,7 @@ class Grouper:
             pass
 
 
-base_path = '/media/maks/общее/Ирина/диссертация/формы_мз_55_56'
+base_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
 
 
 def create_del_svod_groups(base_path):
@@ -125,10 +124,10 @@ def create_del_svod_groups(base_path):
     print('Введите 2 если хотите удалить сводные таблицы по группам')
     print('Введите 3 если хотите выйти')
     print('-' * 57)
-    choise = int(input('Введите сюда число: '))
+    choise_1 = int(input('Введите сюда число: '))
     path_1 = Move(base_path)
 
-    if choise != 3:
+    if choise_1 != 3:
         for _ in path_1.lists_dir():
             path_2 = Move(_)
             for _ in path_2.lists_dir():
@@ -146,9 +145,9 @@ def create_del_svod_groups(base_path):
                                     df1 = pd.read_excel(file)
                                     df = pd.concat([df, df1], ignore_index=True)
                                 svod = Grouper(os.path.split(file)[0], df)
-                                if choise == 1:
+                                if choise_1 == 1:
                                     svod.forms()
-                                elif choise == 2:
+                                elif choise_1 == 2:
                                     svod.delete_file()
                                 print(f'Год: {svod.year} | Форма: {svod.forma} | {svod.form} ||| '
                                       f'Размер сводной таблицы: {svod.df.shape}')
@@ -157,4 +156,3 @@ def create_del_svod_groups(base_path):
         pass
 
 
-create_del_svod_groups(base_path)

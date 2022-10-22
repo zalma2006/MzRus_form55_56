@@ -600,7 +600,7 @@ def find_df56_3_2015(df):
     df56_3.dropna(axis=0, subset=['1'], inplace=True)
     df56_3.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df56_3['1']):
-        if y.lower().strip() == 'наименования':
+        if y.lower().strip() == 'наименования' or str(y).lower().strip().startswith(('3000)', '(3000', '19.03.', '5')):
             df56_3.drop(index=[x], inplace=True)
     df56_3.reset_index(drop=True, inplace=True)
     df56_3.rename(columns={
@@ -676,7 +676,8 @@ def find_df56_3_no1516(df, z):
     df56_3_1.dropna(axis=0, subset=['1'], inplace=True)
     df56_3_1.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df56_3_1['1']):
-        if str(y).lower().strip() == 'наименования':
+        if str(y).lower().strip() == 'наименования' or str(y).lower().strip(). \
+                startswith(('3000)', '(3000', '19.03.', '5', '16.03', '4', '18.03', '11.03.')):
             df56_3_1.drop(index=[x], inplace=True)
     df56_3_1.reset_index(drop=True, inplace=True)
     a = []
@@ -696,7 +697,8 @@ def find_df56_3_no1516(df, z):
     df56_3_2.dropna(axis=0, subset=['1'], inplace=True)
     df56_3_2.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df56_3_2['1']):
-        if str(y).lower().strip() == 'наименования' or str(y).strip() == '1':
+        if str(y).lower().strip() == 'наименования' or str(y).strip() == '1' or str(y).lower().strip(). \
+                startswith(('3000)', '(3000', '19.03.', '5', '16.03', '4', '18.03', '11.03.')):
             df56_3_2.drop(index=[x], inplace=True)
     df56_3_2.reset_index(drop=True, inplace=True)
     df56_3 = pd.concat([df56_3_1, df56_3_2], axis=1, ignore_index=True)
@@ -733,7 +735,7 @@ def find_df56_3_no1516(df, z):
             df56_3[y] = df56_3[y].str.replace(',', '.')
             df56_3[y] = df56_3[y].str.extract(r'(\d+)')
             df56_3[y] = df56_3[y].astype(float)
-    df56_3['наименование_субъекта'] = re.sub(r'[xls.]', '', z)
+    # df56_3['наименование_субъекта'] = re.sub(r'[xls.]', '', z)
     df56_3.at[0, 'наименование'] = '01_лица_получившие_ЭКМП_всего'
     df56_3.at[1, 'наименование'] = '02_из_них_лица_получившие_СанАвиаПомощь'
     df56_3.at[2, 'наименование'] = '03_число_консультаций_всего'
@@ -776,7 +778,8 @@ def find_df56_3_2016(df, z):
     df56_3_1.dropna(axis=0, subset=['1'], inplace=True)
     df56_3_1.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df56_3_1['1']):
-        if str(y).lower().strip() == 'наименования':
+        if str(y).lower().strip() == 'наименования' or str(y).lower().strip(). \
+                startswith(('3000)', '(3000', '09.03', '5', '07.03.', '08.03')):
             df56_3_1.drop(index=[x], inplace=True)
     df56_3_1.reset_index(drop=True, inplace=True)
     a = []
@@ -796,7 +799,8 @@ def find_df56_3_2016(df, z):
     df56_3_2.dropna(axis=0, subset=['1'], inplace=True)
     df56_3_2.reset_index(drop=True, inplace=True)
     for x, y in enumerate(df56_3_2['1']):
-        if str(y).lower().strip() == 'наименования' or str(y).strip() == '1':
+        if str(y).lower().strip() == 'наименования' or str(y).strip() == '1' or str(y).lower().strip(). \
+                startswith(('3000)', '(3000', '09.03', '5', '07.03.', '08.03')):
             df56_3_2.drop(index=[x], inplace=True)
     df56_3_2.reset_index(drop=True, inplace=True)
     df56_3 = pd.concat([df56_3_1, df56_3_2], axis=1, ignore_index=True)
@@ -1009,7 +1013,6 @@ def find_df56_4_no1516(df):
         if 'stop' in a:
             break
     df56_4_1 = df[a[0]:a[-1]].copy()
-
     df56_4_1.dropna(axis=1, how='all', inplace=True)
     df56_4_1.dropna(axis=0, subset=['1'], inplace=True)
     df56_4_1.reset_index(drop=True, inplace=True)
@@ -1023,6 +1026,10 @@ def find_df56_4_no1516(df):
             df56_4_1[y] = df56_4_1[y].str.replace(',', '.')
             df56_4_1[y] = df56_4_1[y].str.extract(r'(\d+)')
             df56_4_1[y] = df56_4_1[y].astype(float)
+    for x, y in enumerate(df56_4_1['1']):
+        if str(y).lower().strip().startswith(('16.03.', '(4000', '4000)', '9', '15')):
+            df56_4_1.drop(index=[x], inplace=True)
+    df56_4_1.reset_index(inplace=True, drop=True)
     a = []
     for x, y in enumerate(df['1']):
         if type(y) == str and \
@@ -1036,6 +1043,10 @@ def find_df56_4_no1516(df):
     df56_4_2.reset_index(drop=True, inplace=True)
     df56_4_2.drop(index=[0, 1], inplace=True)
     df56_4_2.reset_index(drop=True, inplace=True)
+    for x, y in enumerate(df56_4_2['1']):
+        if str(y).lower().strip().startswith(('16.03.', '(4000', '4000)', '9', '1', 'профили мед')):
+            df56_4_2.drop(index=[x], inplace=True)
+    df56_4_2.reset_index(inplace=True, drop=True)
     del df56_4_2['1']
     for x, y in enumerate(df56_4_2.columns):
         if y != 'наименование_субъекта':
@@ -1043,6 +1054,7 @@ def find_df56_4_no1516(df):
             df56_4_2[y] = df56_4_2[y].str.replace(',', '.')
             df56_4_2[y] = df56_4_2[y].str.extract(r'(\d+)')
             df56_4_2[y] = df56_4_2[y].astype(float)
+
     df56_4 = pd.concat([df56_4_1, df56_4_2], ignore_index=True, axis=1)
     df56_4.rename(columns={
         0: 'профили_МП',
@@ -1093,4 +1105,5 @@ def find_df56_4_no1516(df):
     df56_4.at[13, 'профили_МП'] = '14_травматология'
     df56_4.at[14, 'профили_МП'] = '15_хирургия'
     df56_4.at[15, 'профили_МП'] = '16_прочие'
+
     return df56_4

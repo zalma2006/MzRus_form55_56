@@ -1,39 +1,81 @@
 ##
 import os
 
-##
-forma = 56
+import pandas as pd
 
 
-def path_actual(forma, rename_region):
-    if forma == 55:
-        base_path = [r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 55/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 55/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 55/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 55/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 55/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 55/для_программы']
-    if forma == 56:
-        base_path = [r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 56/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 56/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 56/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 56/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 56/для_программы',
-                     r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 56/для_программы']
-    for path in base_path:
-        os.chdir(path)
-        rename_files(base_path=path, rename_region=rename_region)
+class NameFiles:
+    def __init__(self,
+                 rename_region: dict,
+                 file_type_choise: str,
+                 forma: int = 55 | 56):
 
+        self.check_name_files_new = None
+        self.forma = forma
+        self.rename_region = rename_region
+        self.file_type_choise = file_type_choise
+        self.path_file = None
+        self.path_1 = None
+        self.check_files_list = None
+        if self.file_type_choise == 'xls':
+            self.file_type = ('.xls', '.xlsx')
+        elif self.file_type_choise == 'doc':
+            self.file_type = ('.doc', '.docx')
+        if self.forma == 55:
+            self.base_path = [r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 55/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 55/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 55/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 55/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 55/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 55/для_программы']
+            if self.file_type_choise == 'doc':
+                self.base_path = [os.path.dirname(_) for _ in self.base_path]
+        elif self.forma == 56:
+            self.base_path = [r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 56/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 56/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 56/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 56/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 56/для_программы',
+                              r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 56/для_программы']
+            if self.file_type_choise == 'doc':
+                self.base_path = [os.path.dirname(_) for _ in self.base_path]
 
-def rename_files(base_path, rename_region):
-    papki = [x for x in os.listdir(base_path) if x.endswith(('.xls', '.xlsx'))]
-    for name_file in papki:
-        name_file_lower = name_file.lower().strip().replace('h', 'н').replace('t', 'т').replace('a', 'а')
-        name_file_lower = name_file_lower.replace('o', 'о').replace('c', 'с').replace('x', 'х').replace('p', 'р')
-        for rename_file, val in rename_region.items():
-            if rename_file in name_file_lower:
-                os.rename(base_path + f'/{name_file}', base_path + f'/{val}.xlsx')
+    def rename_files(self):
+        for path in self.base_path:
+            os.chdir(path)
+            path_1 = os.getcwd()
+            self.path_file = [x for x in os.listdir(os.getcwd()) if x.endswith(self.file_type) and not str(
+                x).lower().__contains__('федерация')]
+            papki = self.path_file
+            for name_file in papki:
+                name_file_lower = name_file.lower().strip().replace('h', 'н').replace('t', 'т').replace('a', 'а')
+                name_file_lower = name_file_lower.replace('o', 'о').replace('c', 'с').replace('x', 'х').replace('p', 'р')
+                name_file_lower = name_file_lower.replace('m', 'м').replace('k', 'к').replace('b', 'в')
+                for rename_file, val in self.rename_region.items():
+                    if rename_file in name_file_lower:
+                        if rename_file == 'омск' and 'томск' in name_file_lower:
+                            continue
+                        else:
+                            if self.file_type_choise == 'xls':
+                                try:
+                                    os.rename(path_1 + f'/{name_file}', path_1 + f'/{val}.xlsx')
+                                except FileNotFoundError:
+                                    continue
+                            elif self.file_type_choise == 'doc':
+                                try:
+                                    os.rename(path_1 + f'/{name_file}', path_1 + f'/{val}.doc')
+                                except FileNotFoundError:
+                                    continue
 
+            self.check_files_list = self.check_files()
+            print(self.check_files_list)
+
+    def check_files(self):
+        self.check_name_files_new = [os.path.splitext(x)[0] for x in os.listdir(os.getcwd()) if str(x)[:2].isdigit()]
+        self.check_files_list = list(set(list(rename_region.values())) - set(self.check_name_files_new))
+        return self.check_files_list
+
+# name_files = NameFiles(forma=55, rename_region=rename_region, file_type_choise='doc')
 
 rename_region = {'алтайский': '22_Алтайский_край', 'амурск': '28_Амурская_область',
                  'архангель': '29_Архангельская_область', 'астраханск': '30_Астраханская_область',
@@ -87,13 +129,29 @@ no_fly_group = ('карачаев', 'ингуш', 'чуваш', 'чечен', '�
                 'самар', 'ставрополь', 'тверская', 'тульск', 'ульяновск', 'чукот', 'алания', 'брянск', 'волгоград',
                 'крым')
 
-path_actual(forma=forma, rename_region=rename_region)
-##
-import os
+def check_is_file(forma: int, region: dict, type_file: str = 'xlsx'):
+    if forma == 55:
+        base_path = [r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 55/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 55/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 55/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 55/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 55/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 55/для_программы']
 
-base_path = r'/media/maks/общее/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 55/для_программы'
-papki = [x for x in os.listdir(base_path) if x.endswith(('.xls', '.xlsx'))]
-print([x for x in papki if not x[:2].isnumeric()])
+    if forma == 56:
+        base_path = [r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2015 г/ФОРМА 56/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2016 г/ФОРМА 56/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2017 г/ФОРМА 56/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2018 г/ФОРМА 56/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2019 г/ФОРМА 56/для_программы',
+                     r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/2020 г/ФОРМА 56/для_программы']
+    if type_file == 'doc':
+        base_path = [os.path.dirname(_) for _ in base_path]
 
-##
-##
+    for path in base_path:
+        os.chdir(path)
+        print('-' * 30)
+        print(path.split('/')[-3:])
+        print(f'Файлы которых не хватает')
+        print(set(region.values()) - set([x.split('.')[0] for x in os.listdir(os.getcwd())]))
+        print('-' * 30)
