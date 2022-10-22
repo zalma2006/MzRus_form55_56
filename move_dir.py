@@ -1,4 +1,3 @@
-##
 import os
 import pandas as pd
 import re
@@ -115,10 +114,7 @@ class Grouper:
             pass
 
 
-base_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
-
-
-def create_del_svod_groups(base_path):
+def create_del_svod_groups(base_path: str):
     print('-' * 57)
     print('Введите 1 если хотите добавить сводные таблицы по группам')
     print('Введите 2 если хотите удалить сводные таблицы по группам')

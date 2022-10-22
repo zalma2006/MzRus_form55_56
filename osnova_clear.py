@@ -18,7 +18,8 @@ def choise_work():
         pr_str_6 = 'Введите 6 если хотите создать папки для 56 формы'
         pr_str_7 = 'Введите 7 если хотите перенести файлы по группам'
         pr_str_8 = 'Введите 8 если хотите проверить наличие файлов в папках'
-        pr_str_9 = 'Введите 9 если хотите выйти'
+        pr_str_9 = 'Введите 9 если хотите поработать со сводными таблицами'
+        pr_str_10 = 'Введите 10 если хотите выйти'
 
         print('-' * 60)
         print(f'{pr_str_1:>60}')
@@ -30,6 +31,7 @@ def choise_work():
         print(f'{pr_str_7:>60}')
         print(f'{pr_str_8:>60}')
         print(f'{pr_str_9:>60}')
+        print(f'{pr_str_10:>60}')
         print('-' * 60)
         choise = int(input('Введите сюда число: '))
         if choise == 1:
@@ -111,9 +113,9 @@ def choise_work():
             from rename_files import check_is_file, rename_region
             repeat_1 = 0
             while repeat_1 == 0:
-                pr_str_9_1 = '''Введите и "55" или "56" для проверки формы и "doc" или "xlsx" для проверки типов файлов 
+                pr_str_8_1 = '''Введите и "55" или "56" для проверки формы и "doc" или "xlsx" для проверки типов файлов 
 через пробел'''
-                print(f'{pr_str_9_1:>105}')
+                print(f'{pr_str_8_1:>105}')
                 num_form, type_form = input().split()
                 num_form = int(num_form)
                 check_is_file(forma=num_form, region=rename_region, type_file=type_form)
@@ -121,6 +123,10 @@ def choise_work():
                 print('Введите 1 если хотите выйти')
                 repeat_1 = int(input('Введите сюда число: '))
         elif choise == 9:
+            import move_dir
+            tmp_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
+            move_dir.create_del_svod_groups(tmp_path)
+        elif choise == 10:
             break
         else:
             print('Вы не выбрали действие!')
