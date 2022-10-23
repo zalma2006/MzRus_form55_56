@@ -48,18 +48,20 @@ class Grouper:
 
     def __init__(self, path, df):
         self.path: str = path
+        self.df = df
         self.form: str = self.path.split('/')[-2]
         self.groups: str = self.path.split('/')[-1]
         self.forma: int = int([x for x in self.path.split('/') if str(x).endswith((' 56', ' 55'))][0][-2:])
         self.years: tuple = ('2015', '2016', '2017', '2018', '2019', '2020')
         self.year: str = re.match('(\d+)', [x for x in self.path.split('/') if str(x).startswith(self.years)][0])[0]
         self.full_path_group: str = self.path + f'/{self.form}_свод_{self.groups}_{self.year}.xlsx'
-        self.df = df
+        self.full_path_all: str = self.path + f'/{self.form}_свод_{self.groups}_{self.year}_полный.xlsx'
         self.__agg_dict = None
         self.__agg_list2 = None
         self.__agg_list1 = None
 
     def agg_dict(self):
+        # создаём словарь аггрегаций по столбцам, исключаем строковые столбцы и столбец с указанием отчетного года
         self.__agg_list1: list = [x for x in self.df.columns if self.df[x].dtypes != object and str(x) != 'год']
         self.__agg_list2: list = list(map(lambda x: 'sum', range(len(self.__agg_list1))))
         self.__agg_dict: dict = dict(zip(self.__agg_list1, self.__agg_list2))
@@ -70,14 +72,18 @@ class Grouper:
         self.df = self.df.reset_index(drop=False)
         self.df.to_excel(self.full_path_group, index=False)
 
+    def save_file_all_row(self):
+        self.df.to_excel(self.full_path_all, index=False)
+
     def forms(self):
+        self.__agg_dict = self.agg_dict()
         if self.forma == 56:
             self.forma_56()
-        elif self.forma == 55:
-            pass
-            # self.forma_55()
+        if self.forma == 55:
+            self.forma_55()
 
     def forma_56(self):
+        self.save_file_all_row()
         if str(self.form).startswith('Сведения_отдЭКМПиМЭ'):
             self.forma_56_1()
         if str(self.form).startswith('Кадры_отдЭКМПиМЭ'):
@@ -88,27 +94,49 @@ class Grouper:
             self.forma_56_4()
 
     def forma_56_1(self):
-        self.df = self.df.groupby(by=self.df.columns[0]).agg({self.df.columns[1]: 'sum',
-                                                              self.df.columns[-1]: 'min'})
+        self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
         self.save_file()
 
     def forma_56_2(self):
-        self.__agg_dict = self.agg_dict()
         self.df = self.df.groupby(by=['наименование_должностей']).aggregate(self.__agg_dict)
         self.save_file()
 
     def forma_56_3(self):
-        self.__agg_dict = self.agg_dict()
         self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
         self.save_file()
 
     def forma_56_4(self):
-        self.__agg_dict = self.agg_dict()
         self.df = self.df.groupby(by=['профили_МП']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma_55(self):
+        if str(self.form).startswith('Табл_сведения_о_центре_МК'):
+            self.forma55_1()
+        if str(self.form).startswith('Сведения_о_кадрах_мк'):
+            self.forma55_2()
+        if str(self.form).startswith('Формирования_мк'):
+            self.forma55_3()
+        else:
+            pass
+
+    def forma55_1(self):
+        self.save_file_all_row()
+        self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_2(self):
+        self.save_file_all_row()
+        self.df = self.df.groupby(by=['наименование_должностей']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_3(self):
+        self.save_file_all_row()
+        self.df = self.df.groupby(by=['наименование_формирований']).aggregate(self.__agg_dict)
         self.save_file()
 
     def delete_file(self):
         try:
+            os.remove(self.full_path_all)
             os.remove(self.full_path_group)
         except FileNotFoundError:
             pass
@@ -124,6 +152,7 @@ def create_del_svod_groups(base_path: str):
     path_1 = Move(base_path)
 
     if choise_1 != 3:
+
         for _ in path_1.lists_dir():
             path_2 = Move(_)
             for _ in path_2.lists_dir():
@@ -137,18 +166,21 @@ def create_del_svod_groups(base_path: str):
                             for _ in path_6.lists_dir():
                                 path_7 = Move(_)
                                 df = pd.DataFrame()
-                                for file in path_7.lists_file():
-                                    df1 = pd.read_excel(file)
-                                    df = pd.concat([df, df1], ignore_index=True)
-                                svod = Grouper(os.path.split(file)[0], df)
-                                if choise_1 == 1:
-                                    svod.forms()
-                                elif choise_1 == 2:
-                                    svod.delete_file()
-                                print(f'Год: {svod.year} | Форма: {svod.forma} | {svod.form} ||| '
-                                      f'Размер сводной таблицы: {svod.df.shape}')
+                                use_file = [x for x in path_7.lists_file() if not str(x).split('/')[-1].startswith(
+                                    path_7.lists_file()[0].split('/')[-3])]
+                                if len(use_file) > 1:
+                                    for file in use_file:
+                                        df1 = pd.read_excel(file)
+                                        df = pd.concat([df, df1], ignore_index=True)
+                                    svod = Grouper(os.path.split(file)[0], df)
+                                    if choise_1 == 1:
+                                        svod.forms()
+                                    elif choise_1 == 2:
+                                        svod.delete_file()
+                                    print(f'Год: {svod.year} | Форма: {svod.forma} | {svod.form} | {svod.groups} | '
+                                          f'Размер сводной таблицы: {svod.df.shape}')
+                                else:
+                                    continue
 
     else:
         pass
-
-

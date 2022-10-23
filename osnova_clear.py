@@ -34,6 +34,8 @@ def choise_work():
         print(f'{pr_str_10:>60}')
         print('-' * 60)
         choise = int(input('Введите сюда число: '))
+        tmp_path = '//home//maks//Документы//Ирина//диссертация//формы_мз_55_56'
+
         if choise == 1:
             forma = 55
             base_path = choise_paths(forma=forma)
@@ -54,7 +56,7 @@ def choise_work():
             for path in base_path:
                 year = ''.join(re.findall(r'\d+', path.split(r'/')[-3]))
                 problems[year] = clear_df(base_path=path, forma=forma, problems=problems)
-            os.chdir(r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56')
+            os.chdir(tmp_path)
             with open('problems_form56.txt', 'w') as f:
                 for year, problem in problems.items():
                     f.write(f'{year}: {problem}\n')
@@ -64,20 +66,17 @@ def choise_work():
             forma = r'/ФОРМА 55'
             papka_files1 = 'для_программы'
             papka_files2 = 'переработанные_файлы'
-            base_path = r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
-            del_folder(base_path=base_path, form=forma, papka_files1=papka_files1,
+            del_folder(base_path=tmp_path, form=forma, papka_files1=papka_files1,
                        papka_files2=papka_files2)
             break
         elif choise == 4:
             forma = r'/ФОРМА 56'
             papka_files1 = 'для_программы'
             papka_files2 = 'переработанные_файлы'
-            base_path = r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
-            del_folder(base_path=base_path, form=forma, papka_files1=papka_files1,
+            del_folder(base_path=tmp_path, form=forma, papka_files1=papka_files1,
                        papka_files2=papka_files2)
             break
         elif choise == 5:
-            base_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
             folder_list = [r'/Табл_сведения_о_центре_МК', r'/Сведения_о_кадрах_мк', r'/Формирования_мк',
                            r'/Сведения_о_пострадавших_ЧС', r'/Сведения_о_видах_помощи_вЧС', r'/Использование_КФ_приЧС',
                            r'/Сведения_о_лаборатории_мк', r'/Сведения_о_обучении',
@@ -86,24 +85,23 @@ def choise_work():
             form = r'/ФОРМА 55'
             papka_files1 = 'для_программы'
             papka_files2 = 'переработанные_файлы'
-            create_folder(base_path=base_path, folder_list=folder_list, form=form, papka_files1=papka_files1,
+            create_folder(base_path=tmp_path, folder_list=folder_list, form=form, papka_files1=papka_files1,
                           papka_files2=papka_files2)
             break
         elif choise == 6:
-            base_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
             folder_list = [r'/Сведения_отдЭКМПиМЭ', r'/Кадры_отдЭКМПиМЭ',
                            r'/Деятельность_отдЭКМПиМЭ', r'/Выезды_отдЭКМПиМЭ']
             form = r'/ФОРМА 56'
             papka_files1 = 'для_программы'
             papka_files2 = 'переработанные_файлы'
-            create_folder(base_path=base_path, folder_list=folder_list, form=form, papka_files1=papka_files1,
+            create_folder(base_path=tmp_path, folder_list=folder_list, form=form, papka_files1=papka_files1,
                           papka_files2=papka_files2)
             break
         elif choise == 7:
-            from move_files import move_dir, base_path
+            from move_files import move_dir
             from rename_files import fly_yes_llc_group, fly_no_llc_group, no_fly_group
             import shutil
-            error_dict = move_dir(base_path=base_path)
+            error_dict = move_dir(base_path=tmp_path)
             choise_error = int(input('Введите 1 если хотите ли вы посмотреть словарь с ошибками: '))
             if choise_error == 1:
                 print(error_dict)
@@ -115,7 +113,7 @@ def choise_work():
             while repeat_1 == 0:
                 pr_str_8_1 = '''Введите и "55" или "56" для проверки формы и "doc" или "xlsx" для проверки типов файлов 
 через пробел'''
-                print(f'{pr_str_8_1:>105}')
+                print(f'{pr_str_8_1:>110}')
                 num_form, type_form = input().split()
                 num_form = int(num_form)
                 check_is_file(forma=num_form, region=rename_region, type_file=type_form)
@@ -124,8 +122,7 @@ def choise_work():
                 repeat_1 = int(input('Введите сюда число: '))
         elif choise == 9:
             import move_dir
-            tmp_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
-            move_dir.create_del_svod_groups(tmp_path)
+            move_dir.create_del_svod_groups(base_path=tmp_path)
         elif choise == 10:
             break
         else:

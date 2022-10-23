@@ -2,10 +2,7 @@ import os
 import shutil
 from rename_files import fly_yes_llc_group, fly_no_llc_group, no_fly_group
 
-base_path = r'/home/maks/Документы/Ирина/диссертация/формы_мз_55_56'
-
-
-def move_dir(base_path):
+def move_dir(base_path: str):
     paths_file = []
     error_dict = {}
     for folder in os.listdir(base_path):
@@ -47,7 +44,7 @@ def move_dir(base_path):
                                         else:
                                             shutil.move(os.getcwd() + f'/{fol_4}',
                                                         os.getcwd() + f'/{group_list[1]}/{fol_4}')
-                                            if fol_4 not in os.listdir(os.getcwd() + f'/{group_list[0]}'):
+                                            if fol_4 not in os.listdir(os.getcwd() + f'/{group_list[1]}'):
                                                 error_dict[fol_4] = f'Файл не перенесён {os.getcwd()}'
                                                 break
                                 for name in no_fly_group:
@@ -57,7 +54,7 @@ def move_dir(base_path):
                                         else:
                                             shutil.move(os.getcwd() + f'/{fol_4}',
                                                         os.getcwd() + f'/{group_list[2]}/{fol_4}')
-                                            if fol_4 not in os.listdir(os.getcwd() + f'/{group_list[0]}'):
+                                            if fol_4 not in os.listdir(os.getcwd() + f'/{group_list[2]}'):
                                                 error_dict[fol_4] = f'Файл не перенесён {os.getcwd()}'
                                                 break
                                 os.chdir(f'{base_path_2}')
@@ -66,6 +63,3 @@ def move_dir(base_path):
         os.chdir(base_path)
 
     return error_dict
-
-
-error_dict = move_dir(base_path=base_path)

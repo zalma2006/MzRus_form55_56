@@ -86,7 +86,7 @@ def clear_df(base_path, forma, problems):
             df = drop_num_2(df)
             del df[df.columns[-1]]
             df['наименование_субъекта'] = re.sub(r'[xls.]', '', files[x])
-            df1 = find_df1(df, y)
+            df1 = find_df1(df)
             if df1.shape[0] != 14 or df1.shape[1] != 3:
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
@@ -96,11 +96,10 @@ def clear_df(base_path, forma, problems):
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
                 problems[f'{b} - {a} - Сведения_о_кадрах_мк'] = [f'его размеры {df2.shape}, а должны быть (43, 9)']
-            df3 = find_df3(df, y)
-            if ((df3.shape[0] != 56 or df3.shape[1] != 6) and
-                (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) == '2015')) or \
-                    ((df3.shape[0] != 60 or df3.shape[1] != 6) and
-                     (''.join(re.findall(r'\d+', base_path.split(r'/')[-3])) != '2015')):
+            year_df3 = int(''.join(re.findall(r'\d+', base_path.split(r'/')[-3])))
+            df3 = find_df3(df, year=year_df3)
+            if ((df3.shape[0] != 56 or df3.shape[1] != 6) and (str(year_df3) == '2015')) or \
+                    ((df3.shape[0] != 60 or df3.shape[1] != 6) and (str(year_df3) != '2015')):
                 a = ''.join(re.findall(r'\d+', base_path.split(r'/')[-3]))
                 b = re.sub(r'[xls.]', '', files[x])
                 problems[f'{b} - {a} - Формирования_мк'] = [f'его размеры {df3.shape}, а должны быть для 2015 г '
