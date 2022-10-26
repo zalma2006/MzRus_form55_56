@@ -110,28 +110,72 @@ class Grouper:
         self.save_file()
 
     def forma_55(self):
+        self.save_file_all_row()
         if str(self.form).startswith('Табл_сведения_о_центре_МК'):
             self.forma55_1()
         if str(self.form).startswith('Сведения_о_кадрах_мк'):
             self.forma55_2()
         if str(self.form).startswith('Формирования_мк'):
             self.forma55_3()
+        if str(self.form).startswith('Сведения_о_пострадавших_ЧС'):
+            self.forma55_4()
+        if str(self.form).startswith('Сведения_о_видах_помощи_вЧС'):
+            self.forma55_5()
+        if str(self.form).startswith('Использование_КФ_приЧС'):
+            self.forma55_6()
+        if str(self.form).startswith('Сведения_о_лаборатории_мк'):
+            self.forma55_7()
+        if str(self.form).startswith('Сведения_о_обучении'):
+            self.forma55_8()
+        if str(self.form).startswith('Сведения_о_учениях_трениров_занят'):
+            self.forma55_9()
+        if str(self.form).startswith('Сведения_о_трассовых_пунктах'):
+            self.forma55_10()
+        if str(self.form).startswith('Сведения_о_МТО_МК'):
+            self.forma55_11()
         else:
             pass
 
     def forma55_1(self):
-        self.save_file_all_row()
         self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
         self.save_file()
 
     def forma55_2(self):
-        self.save_file_all_row()
         self.df = self.df.groupby(by=['наименование_должностей']).aggregate(self.__agg_dict)
         self.save_file()
 
     def forma55_3(self):
-        self.save_file_all_row()
         self.df = self.df.groupby(by=['наименование_формирований']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_4(self):
+        self.df = self.df.groupby(by=['наименование_чрезвычайных_ситуаций']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_5(self):
+        self.df = self.df.groupby(by=['наименование_чрезвычайных_ситуаций']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_6(self):
+        self.df = self.df.groupby(by=['профиль_коек']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_7(self):
+        self.save_file()
+
+    def forma55_8(self):
+        self.save_file()
+
+    def forma55_9(self):
+        self.df = self.df.groupby(by=['наименование_Чс']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_10(self):
+        self.df = self.df.groupby(by=['показатели_о_деят_трасспунктов']).aggregate(self.__agg_dict)
+        self.save_file()
+
+    def forma55_11(self):
+        self.df = self.df.groupby(by=['наименование_МТО']).aggregate(self.__agg_dict)
         self.save_file()
 
     def delete_file(self):
