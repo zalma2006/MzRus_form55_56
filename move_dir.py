@@ -261,8 +261,13 @@ def create_end_svod():
     df = data_region('/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/Численность и смертность вместе 2015-20'
                      '20.xlsx')
     df.rename(columns={'Название_региона': 'наименование_субъекта'}, inplace=True)
-    pd.options.display.max_columns = None
-    pd.options.display.width = 3000
+    folder_list_55 = ['Табл_сведения_о_центре_МК', 'Сведения_о_кадрах_мк', 'Формирования_мк',
+                      'Сведения_о_пострадавших_ЧС', 'Сведения_о_видах_помощи_вЧС', 'Использование_КФ_приЧС',
+                      'Сведения_о_лаборатории_мк', 'Сведения_о_обучении',
+                      'Сведения_о_учениях_трениров_занят',
+                      'Сведения_о_трассовых_пунктах', 'Сведения_о_МТО_МК']
+    folder_list_56 = ['Сведения_отдЭКМПиМЭ', 'Кадры_отдЭКМПиМЭ', 'Деятельность_отдЭКМПиМЭ', 'Выезды_отдЭКМПиМЭ']
+
     df2 = pd.DataFrame()
     for col_year in years:
         year = int(col_year)
@@ -279,10 +284,22 @@ def create_end_svod():
 
     for file in files:
         df = data_region(path + f'/{file}')
+        for _ in folder_list_55:
+            if file.startswith(_):
+                forma = 'форма_55_'
+        for _ in folder_list_56:
+            if file.startswith(_):
+                forma = 'форма_56_'
+        if forma is None:
+            print('Что то пошло не так, не определена форма')
         df = df.merge(df2, how='left', left_on=['наименование_субъекта', 'год'],
                       right_on=['наименование_субъекта', 'год'])
-        df.to_excel(path + f'/{file}', index=False)
-        print(file)
+        df.to_excel(path + f'/{forma}{file}', index=False)
+        try:
+            os.remove(path + f'/{file}')
+        except FileNotFoundError:
+            print(f'Файл {path + f"/{file}"} не найден!')
+        print(f' Сводная таблица {forma}{file} готова!')
 
 
 def create_del_svod_groups(base_path: str):

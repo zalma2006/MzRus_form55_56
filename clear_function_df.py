@@ -644,6 +644,7 @@ def find_df8(df, z, base_path):
                 df8[x] = df8[x].astype(str)
                 df8[x] = df8[x].str.replace(',', '.')
                 df8[x] = df8[x].astype(float)
+        df8['наименование_субъекта'] = df8['наименование_субъекта'].str.rstrip('.xls')
     elif year in ['2017', '2018', '2019', '2020']:
         for x, y in enumerate(df['1']):
             if type(y) == str and y.lower().lstrip().startswith('проведено учебных цик'):
@@ -679,6 +680,7 @@ def find_df8(df, z, base_path):
                 df8[x] = df8[x].astype(str)
                 df8[x] = df8[x].str.replace(',', '.')
                 df8[x] = df8[x].astype(float)
+        df8['наименование_субъекта'] = df8['наименование_субъекта'].str.rstrip('.xls')
     else:
         pass
     return df8
