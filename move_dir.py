@@ -59,6 +59,14 @@ class Grouper:
         self.__agg_dict = None
         self.__agg_list2 = None
         self.__agg_list1 = None
+        self.base_path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/сводные_таблицы'
+        self.path_save_group = self.base_path + '/сводные_по_группам_все_года' + \
+                               f'/{self.form}_свод_{self.groups}_{self.year}.xlsx'
+        self.path_save_all = self.base_path + '/полные_по_группам_все_года' + \
+                             f'/{self.form}_свод_{self.groups}_{self.year}_полный.xlsx'
+        self.base_path_1 = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/сводные_таблицы/полные_по_группам_' \
+                           'все_года'
+        self.base_path_2 = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/сводные_таблицы'
 
     def agg_dict(self):
         # создаём словарь аггрегаций по столбцам, исключаем строковые столбцы и столбец с указанием отчетного года
@@ -71,9 +79,21 @@ class Grouper:
     def save_file(self):
         self.df = self.df.reset_index(drop=False)
         self.df.to_excel(self.full_path_group, index=False)
+        path_file = os.path.dirname(self.path_save_group)
+        if os.path.isdir(path_file):
+            self.df.to_excel(self.path_save_group, index=False)
+        else:
+            os.mkdir(path_file)
+            self.df.to_excel(self.path_save_group, index=False)
 
     def save_file_all_row(self):
         self.df.to_excel(self.full_path_all, index=False)
+        path_file = os.path.dirname(self.path_save_all)
+        if os.path.isdir(path_file):
+            self.df.to_excel(self.path_save_all, index=False)
+        else:
+            os.mkdir(path_file)
+            self.df.to_excel(self.path_save_all, index=False)
 
     def forms(self):
         self.__agg_dict = self.agg_dict()
@@ -92,22 +112,19 @@ class Grouper:
             self.forma_56_3()
         if str(self.form).startswith('Выезды_отдЭКМПиМЭ'):
             self.forma_56_4()
+        self.save_file()
 
     def forma_56_1(self):
         self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
-        self.save_file()
 
     def forma_56_2(self):
         self.df = self.df.groupby(by=['наименование_должностей']).aggregate(self.__agg_dict)
-        self.save_file()
 
     def forma_56_3(self):
         self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
-        self.save_file()
 
     def forma_56_4(self):
         self.df = self.df.groupby(by=['профили_МП']).aggregate(self.__agg_dict)
-        self.save_file()
 
     def forma_55(self):
         self.save_file_all_row()
@@ -133,8 +150,6 @@ class Grouper:
             self.forma55_10()
         if str(self.form).startswith('Сведения_о_МТО_МК'):
             self.forma55_11()
-        else:
-            pass
 
     def forma55_1(self):
         self.df = self.df.groupby(by=['наименование']).aggregate(self.__agg_dict)
@@ -181,12 +196,97 @@ class Grouper:
     def delete_file(self):
         try:
             os.remove(self.full_path_all)
+        except FileNotFoundError:
+            print(f'Файл {self.full_path_all} не удален')
+        try:
             os.remove(self.full_path_group)
         except FileNotFoundError:
-            pass
+            print(f'Файл {self.full_path_group} не удален')
+        try:
+            os.remove(self.path_save_group)
+        except FileNotFoundError:
+            print(f'Файл {self.path_save_group} не удален')
+        try:
+            os.remove(self.path_save_all)
+        except FileNotFoundError:
+            print(f'Файл {self.path_save_all} не удален')
+
+    def create_svod_forms(self):
+        files = [x for x in os.listdir(self.base_path_1) if os.path.isfile(self.base_path_1 + f'/{x}')]
+        forms = list(set([x.split('_свод_')[0] for x in files]))
+        raspred = {}
+        for i in forms:
+            raspred[i] = [self.base_path_1 + f'/{x}' for x in os.listdir(self.base_path_1) if x.startswith(i)]
+        for key, val in raspred.items():
+            df = pd.DataFrame()
+            for x in val:
+                df1 = pd.read_excel(x, engine='openpyxl')
+                group = x.split('/')[-1]
+                group = int(''.join(re.findall('группа_(\d)_', group)))
+                cols = df1.columns.tolist()
+                cols.remove('наименование_субъекта')
+                cols.insert(0, 'наименование_субъекта')
+                df1 = df1[cols].copy()
+                df1['группа'] = group
+                df = pd.concat([df, df1], ignore_index=True)
+            col = df.columns[1]
+            df.sort_values(by=['год', 'наименование_субъекта', col, 'группа'], ignore_index=True, inplace=True)
+            df.to_excel(self.base_path_2 + f'/{key}_{self.base_path_1.split("/")[-1]}.xlsx', index=False)
+
+    def delete_dop_files(self):
+        for _ in os.listdir(self.base_path_2):
+            if os.path.isfile(self.base_path_2 + f'/{_}'):
+                try:
+                    os.remove(self.base_path_2 + f'/{_}')
+                except FileNotFoundError:
+                    print(f'Файл {self.base_path_2 + f"/{_}"} не удален')
+            elif os.path.isdir(self.base_path_2 + f'/{_}'):
+                try:
+                    os.remove(self.base_path_2 + f'/{_}')
+                except NotADirectoryError or IsADirectoryError:
+                    print(f'Папка {self.base_path_2 + f"/{_}"} не удалена')
+
+
+def create_end_svod():
+    # создаём окончательные сводные таблицы по регионам за все года
+
+    years = ('2015', '2016', '2017', '2018', '2019', '2020')
+
+    path = '/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/сводные_таблицы'
+    files = [x for x in os.listdir(path) if os.path.isfile(path + f'/{x}')]
+
+    def data_region(path: str):
+        return pd.read_excel(path, engine='openpyxl')
+
+    df = data_region('/home/maks/Документы/Ирина/диссертация/формы_мз_55_56/Численность и смертность вместе 2015-20'
+                     '20.xlsx')
+    df.rename(columns={'Название_региона': 'наименование_субъекта'}, inplace=True)
+    pd.options.display.max_columns = None
+    pd.options.display.width = 3000
+    df2 = pd.DataFrame()
+    for col_year in years:
+        year = int(col_year)
+        cols_year = [df.columns[0]] + [x for x in df.columns if x[-4:].endswith(col_year)]
+        df['год'] = year
+        cols_year.append('год')
+        df1 = df[cols_year].copy()
+        cols_year = ['_'.join(x.split('_')[:-1]) for x in df1.columns if x not in ['год', 'наименование_субъекта']]
+        cols_year.insert(0, 'наименование_субъекта')
+        cols_year.append('год')
+        rename_cols = dict(zip(df1.columns.tolist(), cols_year))
+        df1.rename(columns=rename_cols, inplace=True)
+        df2 = pd.concat([df2, df1], ignore_index=True)
+
+    for file in files:
+        df = data_region(path + f'/{file}')
+        df = df.merge(df2, how='left', left_on=['наименование_субъекта', 'год'],
+                      right_on=['наименование_субъекта', 'год'])
+        df.to_excel(path + f'/{file}', index=False)
+        print(file)
 
 
 def create_del_svod_groups(base_path: str):
+    # функция создания сводных таблиц
     print('-' * 57)
     print('Введите 1 если хотите добавить сводные таблицы по группам')
     print('Введите 2 если хотите удалить сводные таблицы по группам')
@@ -225,6 +325,10 @@ def create_del_svod_groups(base_path: str):
                                           f'Размер сводной таблицы: {svod.df.shape}')
                                 else:
                                     continue
-
+        if choise_1 == 1:
+            svod.create_svod_forms()
+            create_end_svod()
+        elif choise_1 == 2:
+            svod.delete_dop_files()
     else:
         pass

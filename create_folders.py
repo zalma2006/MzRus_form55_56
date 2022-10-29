@@ -4,7 +4,7 @@ import shutil
 
 # создадим папки для работы
 def create_folder(base_path, form, papka_files1, papka_files2, folder_list):
-    papki = os.listdir(base_path)
+    papki = [x for x in os.listdir(base_path) if os.path.isdir(base_path + f'/{x}') and x != 'сводные_таблицы']
     for x, y in enumerate(papki):
         if os.path.isdir(base_path + f'/{y}'):
             os.chdir(base_path + f'/{y}' + form)
@@ -39,7 +39,7 @@ def create_folder(base_path, form, papka_files1, papka_files2, folder_list):
 
 
 def del_folder(base_path, form, papka_files1, papka_files2):
-    papki = os.listdir(base_path)
+    papki = [x for x in os.listdir(base_path) if os.path.isdir(base_path + f'/{x}') and x != 'сводные_таблицы']
     for x, y in enumerate(papki):
         if os.path.isdir(base_path + f'/{y}'):
             os.chdir(base_path + f'/{y}' + form)
